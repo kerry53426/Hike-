@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing role information.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["employee", "driver", "admin"] }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "Daily mountain transport and accommodation registration for a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user." },
+        "userName": { "type": "string", "description": "Denormalized name of the user." },
+        "date": { "type": "string", "description": "ISO format date string (YYYY-MM-DD)." },
+        "goingUp": { "type": "boolean" },
+        "goingDown": { "type": "boolean" },
+        "stayingZhudong": { "type": "boolean" },
+        "note": { "type": "string" },
+        "updatedAt": { "type": "string", "description": "Timestamp of last update." }
+      },
+      "required": ["userId", "userName", "date", "goingUp", "goingDown", "stayingZhudong", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles. Anyone can read, only users can update their own non-role fields."
+    },
+    "/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/Registration" },
+      "description": "Registrations for transport and accommodation."
+    }
+  }
+}

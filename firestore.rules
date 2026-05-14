@@ -1,0 +1,117 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Helpers
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+    
+    function isMember() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
+    function isAdmin() {
+      return isMember() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isDriver() {
+      return isMember() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'driver';
+    }
+
+    // -- Users Collection --
+    function isValidUser(data) {
+      return data.keys().hasAll(['name', 'email', 'role']) 
+        && data.keys().size() == 3
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 200
+        && data.role is string && data.role in ['employee', 'driver', 'admin'];
+    }
+
+    match /users/{userId} {
+      // Any verified and registered user can view other users (for employee list)
+      // Or we can just allow read if they are reading their own doc to bootstrap
+      allow get: if isSignedIn() && (request.auth.uid == userId || isMember());
+      allow list: if isSignedIn() && isMember();
+
+      // Employees can register themselves upon first login. 
+      // Default role MUST be 'employee', preventing self-assigned admin roles.
+      allow create: if isSignedIn() 
+        && request.auth.uid == userId
+        && isValidId(userId)
+        && isValidUser(incoming())
+        && incoming().role == 'employee'
+        && incoming().email == request.auth.token.email;
+        
+      allow update: if isSignedIn() && (
+        (
+           request.auth.uid == userId 
+           && isValidUser(incoming())
+           && incoming().diff(existing()).affectedKeys().hasOnly(['name']) 
+           && incoming().role == existing().role
+           && incoming().email == existing().email
+        ) || isAdmin()
+      );
+    }
+
+    // -- Registrations Collection --
+    function isValidRegistration(data) {
+      return data.keys().hasAll(['userId', 'userName', 'date', 'goingUp', 'goingDown', 'stayingZhudong', 'note', 'updatedAt'])
+        && data.keys().size() == 8
+        && data.userId is string && data.userId.size() <= 128
+        && data.userName is string && data.userName.size() <= 100
+        && data.date is string && data.date.size() == 10 && data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.goingUp is bool
+        && data.goingDown is bool
+        && data.stayingZhudong is bool
+        && data.note is string && data.note.size() <= 500
+        && data.updatedAt == request.time;
+    }
+
+    match /registrations/{registrationId} {
+      // Master Gate: only company members can read the schedule
+      allow get, list: if isSignedIn() && isMember();
+
+      allow create: if isSignedIn() 
+        && isMember()
+        && isValidId(registrationId)
+        && isValidRegistration(incoming())
+        && incoming().userId == request.auth.uid
+        // Make sure doc ID matches the exact pair so no duplicate days
+        && registrationId == incoming().userId + "_" + incoming().date;
+
+      allow update: if isSignedIn() && (
+        (
+          isMember()
+          && request.auth.uid == existing().userId
+          && isValidRegistration(incoming())
+          && incoming().userId == existing().userId
+          && incoming().date == existing().date
+          && incoming().diff(existing()).affectedKeys().hasOnly(['userName', 'goingUp', 'goingDown', 'stayingZhudong', 'note', 'updatedAt'])
+        ) || isAdmin() || isDriver() // Drivers might need to override/correct? Let's leave that to admin for now, or just admin.
+      );
+
+      allow delete: if isSignedIn() && (
+        (isMember() && request.auth.uid == existing().userId) || isAdmin()
+      );
+    }
+  }
+}

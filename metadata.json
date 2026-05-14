@@ -1,0 +1,6 @@
+{
+  "name": "雪霸農場接駁排班系統",
+  "description": "提供雪霸農場員工登記每日上下山與竹東住宿的系統，並讓司機可以一目了然地確認每日接駁名單與人數。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
