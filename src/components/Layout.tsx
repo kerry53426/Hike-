@@ -10,24 +10,24 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
 
   return (
     <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col p-4 sm:p-6 font-sans text-slate-800">
-      <header className="flex justify-between items-end mb-6 w-full max-w-6xl mx-auto">
+      <header className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6 w-full max-w-6xl mx-auto">
         <div className="flex flex-col">
           <span className="text-xs font-bold uppercase tracking-widest text-[#2D5A27] mb-1 flex items-center gap-1">
-            <Mountain className="w-4 h-4" />
-            SHEI-PA LEISURE FARM
+            <Mountain className="w-4 h-4 shrink-0" />
+            <span className="truncate">SHEI-PA LEISURE FARM</span>
           </span>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 leading-none">
             交通接駁登記 <span className="text-[#2D5A27] text-2xl sm:text-3xl ml-1">{new Date().getMonth() + 1}月</span>
           </h1>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {loading ? null : user ? (
             <>
-              <div className="hidden sm:flex bg-white border border-slate-200 px-4 py-2 rounded-xl items-center gap-2 shadow-sm relative group cursor-pointer hover:bg-slate-50 transition-colors" role="button" onClick={() => appUser?.role === 'employee' && setShowPhoneEdit(true)}>
-                <div className="w-2 h-2 rounded-full bg-[#27AE60] animate-pulse"></div>
-                <span className="text-sm font-bold text-slate-700 select-none">
-                  {appUser?.name} <span className="opacity-60 text-xs ml-1">({appUser?.role === 'driver' ? '司機' : appUser?.role === 'admin' ? '管理員' : '員工'})</span>
+              <div className="flex bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-xl items-center gap-2 shadow-sm relative group cursor-pointer hover:bg-slate-50 transition-colors flex-1 sm:flex-none justify-center" role="button" onClick={() => appUser?.role === 'employee' && setShowPhoneEdit(true)}>
+                <div className="w-2 h-2 rounded-full bg-[#27AE60] animate-pulse shrink-0"></div>
+                <span className="text-sm font-bold text-slate-700 select-none truncate">
+                  {appUser?.name} <span className="opacity-60 text-xs ml-1 hidden sm:inline">({appUser?.role === 'driver' ? '司機' : appUser?.role === 'admin' ? '管理員' : '員工'})</span>
                 </span>
                 {appUser?.role === 'employee' && (
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
@@ -37,14 +37,14 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               </div>
               <button
                 onClick={logout}
-                className="bg-white text-slate-500 border border-slate-200 p-2 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center hover:bg-slate-50 transition-colors shadow-sm"
+                className="bg-white text-slate-500 border border-slate-200 p-2 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm shrink-0"
                 title="登出"
               >
                 <LogOut className="w-5 h-5 sm:w-4 sm:h-4" />
               </button>
             </>
           ) : (
-            <span className="bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold flex items-center shadow-sm">
+            <span className="bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold flex items-center shadow-sm w-full sm:w-auto justify-center">
               未登入
             </span>
           )}
@@ -81,19 +81,19 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
       )}
 
       {user && !loading && (
-        <div className="mb-6 flex gap-3 w-full max-w-6xl mx-auto">
+        <div className="mb-6 flex flex-wrap gap-2 sm:gap-3 w-full max-w-6xl mx-auto">
             {appUser?.role !== 'driver' && (
               <button
                 onClick={() => setActiveTab('my-schedule')}
                 className={clsx(
-                  "px-5 py-2.5 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-sm",
+                  "px-4 sm:px-5 py-2.5 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none",
                   activeTab === 'my-schedule' 
                     ? "bg-[#2D5A27] text-white" 
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
                 )}
               >
-                <Calendar className="w-4 h-4" />
-                <span>我的登記</span>
+                <Calendar className="w-4 h-4 shrink-0" />
+                <span className="whitespace-nowrap">我的登記</span>
               </button>
             )}
             
@@ -101,14 +101,14 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               <button
                 onClick={() => setActiveTab('daily-manifest')}
                 className={clsx(
-                  "px-5 py-2.5 rounded-xl font-bold flex items-center space-x-2 transition-all shadow-sm",
+                  "px-4 sm:px-5 py-2.5 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none",
                   activeTab === 'daily-manifest' 
                     ? "bg-[#2D5A27] text-white" 
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
                 )}
               >
-                <Bus className="w-4 h-4" />
-                <span>每日接駁名單</span>
+                <Bus className="w-4 h-4 shrink-0" />
+                <span className="whitespace-nowrap">每日接駁名單</span>
               </button>
             )}
         </div>

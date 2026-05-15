@@ -151,12 +151,12 @@ export const MySchedule = () => {
 
   return (
     <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full h-full">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/50">
         <div>
           <h2 className="text-2xl font-black text-slate-900 mb-1">排班登記</h2>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">只能填寫三天後的資訊，近三日請聯繫司機代填</span>
         </div>
-        <div className="flex items-center space-x-1 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center space-x-1 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
           <button onClick={fetchRegistrations} title="重新整理取得最新資料" className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors hidden sm:block">
             <RefreshCw className={clsx("w-5 h-5", loading && "animate-spin text-[#2D5A27]")} />
           </button>
@@ -164,7 +164,7 @@ export const MySchedule = () => {
           <button onClick={prevMonth} className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-base font-bold text-slate-900 min-w-[100px] text-center tracking-wide font-mono">
+          <span className="text-base font-bold text-slate-900 min-w-[100px] text-center tracking-wide font-mono flex-1 sm:flex-none">
             {format(currentDate, "yyyy . MM")}
           </span>
           <button onClick={nextMonth} className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors">

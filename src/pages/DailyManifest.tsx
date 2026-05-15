@@ -313,8 +313,8 @@ export const DailyManifest = () => {
     <div className="flex flex-col h-full space-y-6">
       <div className="flex flex-col xl:flex-row justify-between xl:items-center gap-4 bg-white p-4 sm:p-5 rounded-[2rem] border border-slate-200 shadow-sm">
         <div className="flex items-center justify-between w-full xl:w-auto">
-           <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2 shrink-0">
-             每日接駁名單 <span className="bg-[#FFF4E5] text-[#D35400] text-sm px-2.5 py-1 rounded-xl tracking-widest font-black uppercase">三日檢視</span>
+           <h2 className="text-xl sm:text-2xl font-black text-slate-800 flex flex-wrap items-center gap-2 shrink-0">
+             每日接駁名單 <span className="bg-[#FFF4E5] text-[#D35400] text-xs sm:text-sm px-2.5 py-1 rounded-xl tracking-widest font-black uppercase">三日檢視</span>
            </h2>
         </div>
         
@@ -371,8 +371,8 @@ export const DailyManifest = () => {
            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-[#D35400]">
               <Plus className="w-5 h-5" /> 司機代填乘車登記
            </h2>
-           <form onSubmit={handleAddSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-2 items-start">
-              <div className="flex flex-col gap-1">
+           <form onSubmit={handleAddSubmit} className="flex flex-col md:grid md:grid-cols-4 gap-4 mb-2 items-start w-full">
+              <div className="flex flex-col gap-1 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">日期</label>
                 <input 
                   type="date" 
@@ -380,11 +380,11 @@ export const DailyManifest = () => {
                   required 
                   value={addDateStr}
                   onChange={e => setAddDateStr(e.target.value)}
-                  className="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium font-mono text-slate-700 bg-white" 
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium font-mono text-slate-700 bg-white" 
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">員工姓名</label>
                 <input 
                    name="name" 
@@ -393,14 +393,14 @@ export const DailyManifest = () => {
                    list="name-list"
                    value={addName}
                    onChange={handleNameChange}
-                   className="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium bg-white" 
+                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium bg-white" 
                 />
                 <datalist id="name-list">
                    {allUsers.map(u => <option key={`name_${u.phone}`} value={u.name} />)}
                 </datalist>
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 w-full">
                 <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">聯絡電話</label>
                 <input 
                    name="phone" 
@@ -409,32 +409,32 @@ export const DailyManifest = () => {
                    list="phone-list"
                    value={addPhone}
                    onChange={handlePhoneChange}
-                   className="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium bg-white" 
+                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#D35400] focus:ring-2 focus:ring-[#D35400]/20 font-medium bg-white" 
                 />
                 <datalist id="phone-list">
                    {allUsers.map(u => <option key={`phone_${u.phone}`} value={u.phone}>{u.name}</option>)}
                 </datalist>
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 w-full">
                  <label className="text-[10px] font-bold text-slate-400 uppercase ml-2">選項</label>
-                 <div className="flex gap-2">
-                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                 <div className="flex gap-2 w-full">
+                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 sm:py-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                       <input type="checkbox" name="goingDown" value="true" className="w-4 h-4 accent-[#27AE60]" />
-                      <span className="font-bold text-slate-700 text-xs">下山</span>
+                      <span className="font-bold text-slate-700 text-xs sm:text-sm">下山</span>
                    </label>
-                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 sm:py-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                       <input type="checkbox" name="goingUp" value="true" className="w-4 h-4 accent-[#D35400]" />
-                      <span className="font-bold text-slate-700 text-xs">上山</span>
+                      <span className="font-bold text-slate-700 text-xs sm:text-sm">上山</span>
                    </label>
-                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors">
+                   <label className="flex-1 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-xl px-1 py-1.5 sm:py-2.5 cursor-pointer hover:bg-slate-50 transition-colors">
                       <input type="checkbox" name="stayingZhudong" value="true" className="w-4 h-4 accent-[#2980B9]" />
-                      <span className="font-bold text-slate-700 text-xs text-center leading-tight">住宿</span>
+                      <span className="font-bold text-slate-700 text-xs sm:text-sm text-center leading-tight">住宿</span>
                    </label>
                 </div>
               </div>
-              <div className="md:col-span-4 flex justify-end mt-2">
-                 <button disabled={adding} type="submit" className="bg-[#D35400] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#b04500] transition-colors shadow-sm disabled:opacity-50">
+              <div className="md:col-span-4 flex justify-end mt-2 w-full">
+                 <button disabled={adding} type="submit" className="w-full md:w-auto bg-[#D35400] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#b04500] transition-colors shadow-sm disabled:opacity-50">
                     {adding ? "儲存中..." : "確定新增"}
                  </button>
               </div>
