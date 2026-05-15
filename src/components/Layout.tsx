@@ -4,8 +4,9 @@ import { Mountain, LogOut, LogIn, Calendar, Bus } from "lucide-react";
 import clsx from "clsx";
 
 export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactNode, activeTab: string, setActiveTab: (tab: string) => void }) => {
-  const { user, appUser, loading, login, logout } = useAuth();
+  const { user, appUser, loading, login, updatePhone, logout } = useAuth();
   const [loginRole, setLoginRole] = useState("employee");
+  const [showPhoneEdit, setShowPhoneEdit] = useState(false);
 
   return (
     <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col p-4 sm:p-6 font-sans text-slate-800">
@@ -23,11 +24,16 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
         <div className="flex gap-3">
           {loading ? null : user ? (
             <>
-              <div className="hidden sm:flex bg-white border border-slate-200 px-4 py-2 rounded-xl items-center gap-2 shadow-sm">
+              <div className="hidden sm:flex bg-white border border-slate-200 px-4 py-2 rounded-xl items-center gap-2 shadow-sm relative group cursor-pointer hover:bg-slate-50 transition-colors" role="button" onClick={() => appUser?.role === 'employee' && setShowPhoneEdit(true)}>
                 <div className="w-2 h-2 rounded-full bg-[#27AE60] animate-pulse"></div>
-                <span className="text-sm font-bold text-slate-700">
+                <span className="text-sm font-bold text-slate-700 select-none">
                   {appUser?.name} <span className="opacity-60 text-xs ml-1">({appUser?.role === 'driver' ? '司機' : appUser?.role === 'admin' ? '管理員' : '員工'})</span>
                 </span>
+                {appUser?.role === 'employee' && (
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                    點擊修改電話
+                  </div>
+                )}
               </div>
               <button
                 onClick={logout}
@@ -44,6 +50,35 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
           )}
         </div>
       </header>
+
+      {showPhoneEdit && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+             <h3 className="text-2xl font-black mb-2 text-slate-900">修改聯絡電話</h3>
+             <p className="text-sm text-slate-500 mb-6 font-medium">更新您的電話，司機才能順利聯絡到您喔！</p>
+             <form onSubmit={(e) => {
+               e.preventDefault();
+               const phone = (new FormData(e.currentTarget)).get('phone') as string;
+               if (phone.trim()) {
+                 updatePhone(phone.trim());
+                 setShowPhoneEdit(false);
+               }
+             }}>
+                <input 
+                  name="phone" 
+                  defaultValue={appUser?.phone || ""}
+                  required
+                  placeholder="輸入新電話號碼"
+                  className="w-full px-4 py-3 border border-slate-200 focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] outline-none rounded-xl font-medium mb-6"
+                />
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setShowPhoneEdit(false)} className="flex-1 py-3 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">取消</button>
+                  <button type="submit" className="flex-1 py-3 font-bold text-white bg-[#2D5A27] hover:bg-[#1f3f1b] rounded-xl transition-colors shadow-sm">儲存</button>
+                </div>
+             </form>
+           </div>
+        </div>
+      )}
 
       {user && !loading && (
         <div className="mb-6 flex gap-3 w-full max-w-6xl mx-auto">
