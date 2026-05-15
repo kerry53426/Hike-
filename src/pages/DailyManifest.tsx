@@ -3,7 +3,7 @@ import { format, addDays, subDays, isToday } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { getRegistrations, updateRegistration } from "../lib/pantry";
 import { Registration } from "../types";
-import { ChevronLeft, ChevronRight, MapPin, ArrowUp, ArrowDown, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowUp, ArrowDown, Plus, X, RefreshCw } from "lucide-react";
 import clsx from "clsx";
 
 export const DailyManifest = () => {
@@ -120,6 +120,10 @@ export const DailyManifest = () => {
             className="text-sm font-bold text-white bg-[#D35400] px-4 py-2 rounded-xl transition-colors hover:bg-[#b04500] flex items-center gap-1 shadow-sm"
           >
             <Plus className="w-4 h-4" /> 代填登記
+          </button>
+
+          <button onClick={() => fetchDailyData(currentDate)} title="重新整理取得最新資料" className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors bg-white border border-slate-200 shadow-sm">
+            <RefreshCw className={clsx("w-4 h-4", loading && "animate-spin text-[#D35400]")} />
           </button>
 
           {!isToday(currentDate) && (
