@@ -3,8 +3,132 @@ import { format, addDays, subDays, isToday } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { getRegistrations, updateRegistration } from "../lib/pantry";
 import { Registration } from "../types";
-import { ChevronLeft, ChevronRight, MapPin, ArrowUp, ArrowDown, Plus, X, RefreshCw, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowUp, ArrowDown, Plus, X, RefreshCw, Calendar as CalendarIcon, ChevronDown, ChevronUp } from "lucide-react";
 import clsx from "clsx";
+
+const DayView = ({ dayDate, registrations }: { dayDate: Date, registrations: Registration[] }) => {
+  const [expanded, setExpanded] = useState(isToday(dayDate));
+  
+  const dateStr = format(dayDate, "yyyy-MM-dd");
+  const dayRegs = registrations.filter(r => r.date === dateStr);
+  const goingUp = dayRegs.filter(r => r.goingUp);
+  const goingDown = dayRegs.filter(r => r.goingDown);
+  const stayingUser = dayRegs.filter(r => r.stayingZhudong);
+
+  return (
+    <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 shadow-sm flex flex-col overflow-hidden transition-all">
+       <div 
+         onClick={() => setExpanded(!expanded)}
+         className={clsx("p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 transition-colors", expanded && "bg-slate-50 border-b border-slate-100")}
+       >
+           <div className="flex items-center gap-3">
+               <span className={clsx("font-black font-mono text-xl sm:text-2xl", isToday(dayDate) ? "text-[#2D5A27]" : "text-slate-800")}>{format(dayDate, "MM.dd")}</span>
+               <span className={clsx("text-sm font-bold", isToday(dayDate) ? "text-[#2D5A27]" : "text-slate-500")}>{format(dayDate, "EEE", { locale: zhTW }).toUpperCase()}</span>
+               {isToday(dayDate) && <span className="text-[10px] bg-[#2D5A27] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0">TODAY</span>}
+           </div>
+
+           <div className="flex items-center gap-4 sm:gap-6">
+              <div className="flex flex-col items-center gap-0.5" title="下山">
+                 <span className="text-[10px] font-bold text-slate-400">下山</span>
+                 <div className="flex items-center gap-1.5">
+                    <ArrowDown className="w-3.5 h-3.5 text-[#27AE60]" />
+                    <span className="font-black text-slate-700 text-lg leading-none">{goingDown.length}</span>
+                 </div>
+              </div>
+              <div className="flex flex-col items-center gap-0.5" title="上山">
+                 <span className="text-[10px] font-bold text-slate-400">上山</span>
+                 <div className="flex items-center gap-1.5">
+                    <ArrowUp className="w-3.5 h-3.5 text-[#D35400]" />
+                    <span className="font-black text-slate-700 text-lg leading-none">{goingUp.length}</span>
+                 </div>
+              </div>
+              <div className="flex flex-col items-center gap-0.5" title="住宿">
+                 <span className="text-[10px] font-bold text-slate-400">住宿</span>
+                 <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#2980B9]" />
+                    <span className="font-black text-slate-700 text-lg leading-none">{stayingUser.length}</span>
+                 </div>
+              </div>
+              <div className="w-8 h-8 ml-2 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 shrink-0 shadow-sm">
+                 {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+           </div>
+       </div>
+
+       {expanded && (
+         <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-6 bg-white animate-in zoom-in-95 duration-200 origin-top">
+            <div className="space-y-3">
+              <h3 className="text-[11px] uppercase tracking-widest font-black text-[#27AE60] flex items-center gap-2 bg-[#EAF1EA] px-3 py-1.5 rounded-lg w-fit">
+                <ArrowDown className="w-3.5 h-3.5" /> 下山名單 <span className="bg-[#27AE60] text-white px-1.5 py-0.5 rounded-md text-[10px] ml-1">{goingDown.length}</span>
+              </h3>
+              {goingDown.length === 0 ? (
+                <div className="text-sm font-medium text-slate-400 py-3 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  尚無登記
+                </div>
+              ) : (
+                <ul className="text-sm space-y-2 font-bold text-slate-700">
+                  {goingDown.map(user => (
+                      <li key={`${user.userId}_down`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 bg-slate-50 px-3 py-2 rounded-xl">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 min-w-[6px] rounded-full bg-[#27AE60]"></div>
+                            {user.userName}
+                        </div>
+                        {user.phone && <a href={`tel:${user.phone}`} className="text-[10px] text-[#27AE60] font-mono border border-[#27AE60]/30 px-1.5 py-0.5 rounded-md hover:bg-[#27AE60]/10 shrink-0 w-fit">{user.phone}</a>}
+                      </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-[11px] uppercase tracking-widest font-black text-[#D35400] flex items-center gap-2 bg-[#FFF4E5] px-3 py-1.5 rounded-lg w-fit">
+                <ArrowUp className="w-3.5 h-3.5" /> 上山名單 <span className="bg-[#D35400] text-white px-1.5 py-0.5 rounded-md text-[10px] ml-1">{goingUp.length}</span>
+              </h3>
+              {goingUp.length === 0 ? (
+                <div className="text-sm font-medium text-slate-400 py-3 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  尚無登記
+                </div>
+              ) : (
+                <ul className="text-sm space-y-2 font-bold text-slate-700">
+                    {goingUp.map(user => (
+                      <li key={`${user.userId}_up`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 bg-slate-50 px-3 py-2 rounded-xl">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 min-w-[6px] rounded-full bg-[#E67E22]"></div>
+                            {user.userName}
+                        </div>
+                        {user.phone && <a href={`tel:${user.phone}`} className="text-[10px] text-[#D35400] font-mono border border-[#D35400]/30 px-1.5 py-0.5 rounded-md hover:bg-[#FFF4E5]/50 shrink-0 w-fit">{user.phone}</a>}
+                      </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-[11px] font-black tracking-widest text-[#2980B9] uppercase flex items-center gap-2 bg-[#EBF5FB] px-3 py-1.5 rounded-lg w-fit">
+                <MapPin className="w-3.5 h-3.5" /> 竹東住宿 <span className="bg-[#2980B9] text-white px-1.5 py-0.5 rounded-md text-[10px] ml-1">{stayingUser.length}</span>
+              </h3>
+              {stayingUser.length === 0 ? (
+                <div className="text-sm font-medium text-slate-400 py-3 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                  無人登記
+                </div>
+              ) : (
+                  <ul className="text-sm text-slate-500 font-medium flex flex-wrap gap-2">
+                    {stayingUser.map(user => (
+                      <li key={`${user.userId}_zhudong`} className="bg-slate-50 border border-slate-200/60 px-2.5 py-1.5 rounded-lg flex items-center gap-2">
+                          <span className="text-xs font-bold">{user.userName}</span>
+                          {user.phone && <a href={`tel:${user.phone}`} title={user.phone} className="text-[#2980B9] hover:text-[#1A5276]">
+                             <CalendarIcon className="w-3 h-3" />
+                          </a>}
+                      </li>
+                    ))}
+                  </ul>
+              )}
+            </div>
+         </div>
+       )}
+    </div>
+  );
+};
 
 export const DailyManifest = () => {
   const [baseDate, setBaseDate] = useState(new Date());
@@ -323,8 +447,8 @@ export const DailyManifest = () => {
            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D35400]"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 items-stretch pb-8">
-           {daysToShow.map(day => renderDayColumn(day))}
+        <div className="flex flex-col gap-4 flex-1 items-stretch pb-8">
+           {daysToShow.map(day => <DayView key={format(day, 'yyyy-MM-dd')} dayDate={day} registrations={registrations} />)}
         </div>
       )}
     </div>
