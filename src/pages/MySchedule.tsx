@@ -21,11 +21,22 @@ export const MySchedule = () => {
     try {
       const data = await getRegistrations();
       const myData: Record<string, Registration> = {};
+      let foundPhone = "";
+
       Object.entries(data).forEach(([key, reg]) => {
+          if (appUser.role === 'employee' && !appUser.phone && reg.userName === appUser.name && reg.phone && !foundPhone) {
+              foundPhone = reg.phone;
+          }
+
           if (reg && reg.userId === appUser.uid && !reg.deleted) {
               myData[reg.date] = reg;
           }
       });
+
+      if (foundPhone && !appUser.phone) {
+          updatePhone(foundPhone);
+      }
+
       setRegistrations(myData);
     } catch (error) {
       console.error(error);
@@ -112,6 +123,13 @@ export const MySchedule = () => {
 
   // Show setup screen if employee hasn't entered phone number yet
   if (appUser?.role === 'employee' && !appUser.phone) {
+    if (loading) {
+       return (
+        <div className="flex-1 flex justify-center items-center h-full min-h-[400px]">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D35400]"></div>
+        </div>
+       );
+    }
     return (
       <div className="bg-white rounded-[2rem] border border-slate-200 p-10 max-w-md mx-auto mt-10 shadow-sm flex flex-col items-center">
          <h2 className="text-2xl font-black text-slate-900 mb-2">聯絡方式設定</h2>

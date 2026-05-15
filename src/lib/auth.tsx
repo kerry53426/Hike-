@@ -40,10 +40,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (name: string, role: string) => {
+    let savedPhone;
+    try {
+      const phones = JSON.parse(localStorage.getItem("sheipa_saved_phones") || "{}");
+      savedPhone = phones[name];
+    } catch(e) {}
+
     const newUser: AppUser = {
       uid: name, // use name as simple uid
       name,
-      role: role as "employee" | "driver" | "admin"
+      role: role as "employee" | "driver" | "admin",
+      ...(savedPhone && { phone: savedPhone })
     };
     localStorage.setItem("sheipa_user", JSON.stringify(newUser));
     setAppUser(newUser);
@@ -53,6 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (appUser) {
       const updatedUser = { ...appUser, phone };
       localStorage.setItem("sheipa_user", JSON.stringify(updatedUser));
+      
+      try {
+        const phones = JSON.parse(localStorage.getItem("sheipa_saved_phones") || "{}");
+        phones[appUser.name] = phone;
+        localStorage.setItem("sheipa_saved_phones", JSON.stringify(phones));
+      } catch (e) {}
+
       setAppUser(updatedUser);
     }
   };
