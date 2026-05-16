@@ -15,7 +15,7 @@ function AppContent() {
 
   // set default tab based on role
   useEffect(() => {
-    if (appUser?.role === "driver") {
+    if (appUser?.role === "driver" || appUser?.role === "admin") {
       setActiveTab("daily-manifest");
     } else {
       setActiveTab("my-schedule");
@@ -24,9 +24,8 @@ function AppContent() {
 
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {activeTab === "my-schedule" && appUser?.role !== "driver" ? <MySchedule /> : null}
-      {activeTab === "daily-manifest" ? <DailyManifest /> : null}
-      {activeTab === "my-schedule" && appUser?.role === "driver" && <DailyManifest /> /* Fallback */}
+      {activeTab === "my-schedule" && appUser?.role === "employee" ? <MySchedule /> : null}
+      {(activeTab === "daily-manifest" || appUser?.role !== "employee") ? <DailyManifest /> : null}
     </Layout>
   );
 }

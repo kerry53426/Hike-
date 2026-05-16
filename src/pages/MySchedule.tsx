@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, startOfToday, differenceInDays, startOfDay } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Lock, RefreshCw, BarChart2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, RefreshCw, BarChart2, CheckCircle2, Timer, AlertCircle } from "lucide-react";
 import { getRegistrations, updateRegistration } from "../lib/pantry";
 import { useAuth } from "../lib/auth";
 import { Registration } from "../types";
@@ -174,6 +174,8 @@ export const MySchedule = () => {
   const [myRegistrations, setMyRegistrations] = useState<Record<string, Registration>>({});
   const [allRegistrations, setAllRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   const fetchRegistrations = async () => {
     if (!appUser) return;
@@ -287,6 +289,8 @@ export const MySchedule = () => {
         };
         await updateRegistration(docId, payload);
       }
+      setLastSaved(new Date().toLocaleTimeString());
+      setTimeout(() => setLastSaved(null), 3000);
     } catch (error) {
       console.error(error);
       alert("儲存失敗，請重試");
@@ -350,15 +354,23 @@ export const MySchedule = () => {
   return (
     <div className="bg-white rounded-[2.5rem] shadow-md border border-slate-200 overflow-hidden flex flex-col w-full h-full">
       <div className="p-5 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white">
-        <div>
-          <h2 className="text-3xl font-black text-slate-900 mb-1">排班登記</h2>
-          <div className="flex items-center gap-2">
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-               <Lock className="w-3 h-3" /> 近三日已鎖定
-             </span>
-             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">三日後可自由修改</span>
+        <div className="flex items-center gap-4">
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 mb-1">排班登記</h2>
+            <div className="flex items-center gap-2">
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                 <Lock className="w-3 h-3" /> 近三日已鎖定
+               </span>
+               <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+               <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">三日後可自由修改</span>
+            </div>
           </div>
+          {lastSaved && (
+            <div className="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100 animate-in fade-in slide-in-from-left-2 transition-all">
+              <CheckCircle2 className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">已存檔 {lastSaved}</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-1 bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200 shadow-inner w-full sm:w-auto justify-between sm:justify-start">
           <button onClick={fetchRegistrations} title="重新整理取得最新資料" className="p-2.5 hover:bg-white text-slate-600 rounded-2xl transition-all hover:shadow-sm hidden sm:block">
@@ -378,9 +390,23 @@ export const MySchedule = () => {
       </div>
 
       {loading ? (
-        <div className="p-12 text-center flex flex-col items-center flex-1 justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">正在載入排班資訊...</p>
+        <div className="p-8 space-y-6">
+          <div className="h-40 bg-slate-50 rounded-3xl animate-pulse"></div>
+          <div className="space-y-4">
+             {[1,2,3,4,5].map(i => (
+               <div key={i} className="h-24 bg-slate-50/50 rounded-3xl animate-pulse flex items-center px-8 gap-4">
+                  <div className="w-14 h-14 bg-slate-100 rounded-2xl"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-100 rounded-full w-1/4"></div>
+                    <div className="h-2 bg-slate-100 rounded-full w-1/2"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-20 h-10 bg-slate-100 rounded-xl"></div>
+                    <div className="w-20 h-10 bg-slate-100 rounded-xl"></div>
+                  </div>
+               </div>
+             ))}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col flex-1 overflow-hidden">

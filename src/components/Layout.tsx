@@ -9,15 +9,17 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-[#fdfcfb] flex flex-col p-4 sm:p-6 font-sans text-slate-800 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
-      <header className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6 w-full max-w-6xl mx-auto">
-        <div className="flex flex-col">
-          <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#1B4332] mb-1 flex items-center gap-1.5 opacity-80">
-            <Mountain className="w-4 h-4 shrink-0 fill-[#1B4332]/10" />
+    <div className="min-h-screen w-full bg-[#fdfcfb] flex flex-col p-4 sm:p-6 font-sans text-slate-800 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px]">
+      <header className="flex flex-col md:flex-row justify-between md:items-end gap-6 mb-10 w-full max-w-6xl mx-auto px-2">
+        <div className="flex flex-col relative">
+          <div className="absolute -left-4 top-0 w-1 h-12 bg-[#1B4332] rounded-full hidden md:block"></div>
+          <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] text-[#1B4332] mb-2 flex items-center gap-2 opacity-70">
+            <Mountain className="w-5 h-5 shrink-0" />
             <span className="truncate">SHEI-PA LEISURE FARM / 雪霸農場</span>
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 leading-none tracking-tighter">
-            交通接駁系統 <span className="text-[#2D5A27] text-2xl sm:text-3xl ml-1 font-serif italic border-b-4 border-[#2D5A27]/20">{new Date().getMonth() + 1}月</span>
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-none tracking-tighter flex items-baseline gap-2">
+            交通接駁系統 
+            <span className="text-[#1B4332] text-xl sm:text-2xl font-serif italic border-b-4 border-[#1B4332]/10 pb-1 px-2 rounded-lg bg-[#1B4332]/5">{new Date().getMonth() + 1}月版</span>
           </h1>
         </div>
         
