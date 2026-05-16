@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { format, addDays, subDays, isToday } from "date-fns";
+import React, { useState, useEffect, useMemo } from "react";
+import { format, addDays, subDays, isToday, startOfToday } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { getRegistrations, updateRegistration } from "../lib/pantry";
 import { Registration } from "../types";
@@ -109,7 +109,7 @@ const DayView = ({ dayDate, registrations }: DayViewProps) => {
   return (
     <div className={clsx(
       "bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border shadow-sm flex flex-col overflow-hidden transition-all duration-300",
-      isToday(dayDate) ? "border-[#2D5A27]/30 shadow-md ring-1 ring-[#2D5A27]/5" : "border-slate-200"
+      isToday(dayDate) ? "border-[#1B4332]/30 shadow-md ring-1 ring-[#1B4332]/5" : "border-slate-200"
     )}>
        <div 
          onClick={() => setExpanded(!expanded)}
@@ -121,7 +121,7 @@ const DayView = ({ dayDate, registrations }: DayViewProps) => {
            <div className="flex items-center gap-4">
                <div className={clsx(
                  "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center shadow-inner",
-                 isToday(dayDate) ? "bg-[#2D5A27] text-white" : "bg-slate-100 text-slate-600"
+                 isToday(dayDate) ? "bg-[#1B4332] text-white" : "bg-slate-100 text-slate-600"
                )}>
                  <span className="text-xs font-black opacity-80 leading-none">{format(dayDate, "MMM")}</span>
                  <span className="text-xl sm:text-2xl font-black leading-none">{format(dayDate, "dd")}</span>
@@ -129,7 +129,7 @@ const DayView = ({ dayDate, registrations }: DayViewProps) => {
                <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     <span className="text-lg sm:text-xl font-black text-slate-900">{format(dayDate, "EEEE", { locale: zhTW })}</span>
-                    {isToday(dayDate) && <span className="text-[9px] bg-[#27AE60] text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter shrink-0">今天</span>}
+                    {isToday(dayDate) && <span className="text-[9px] bg-[#1B4332] text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter shrink-0">今天 Today</span>}
                   </div>
                   <span className="text-xs font-bold text-slate-400 font-mono tracking-wider">{dateStr}</span>
                </div>
@@ -206,7 +206,7 @@ const DayView = ({ dayDate, registrations }: DayViewProps) => {
                 </div>
               ) : (
                 <ul className="space-y-2.5">
-                    {goingUp.map(user => (
+                  {goingUp.map(user => (
                       <UserItem key={`${user.userId}_up`} user={user} type="up" />
                   ))}
                 </ul>
@@ -330,7 +330,10 @@ export const DailyManifest = () => {
     if (found) setAddName(found.name);
   };
 
-  const daysToShow = [baseDate, addDays(baseDate, 1), addDays(baseDate, 2)];
+  const daysToShow = useMemo(() => {
+    const today = startOfToday();
+    return [baseDate, addDays(baseDate, 1), addDays(baseDate, 2)].filter(day => day >= today);
+  }, [baseDate]);
 
   const renderDayColumn = (dayDate: Date) => {
     const dateStr = format(dayDate, "yyyy-MM-dd");
@@ -340,12 +343,12 @@ export const DailyManifest = () => {
     const stayingUser = dayRegs.filter(r => r.stayingZhudong);
 
     return (
-      <div key={dateStr} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm flex flex-col min-h-[400px]">
-         <div className="bg-slate-50 border-b border-slate-100 p-4 rounded-t-[2rem] flex items-center justify-between sticky top-0 z-10">
+      <div key={dateStr} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm flex flex-col min-h-[400px] overflow-hidden">
+         <div className="bg-white border-b border-slate-50 p-4 flex items-center justify-between sticky top-0 z-10">
              <div className="flex items-center gap-2">
-                 <span className={clsx("font-black font-mono text-xl", isToday(dayDate) ? "text-[#2D5A27]" : "text-slate-800")}>{format(dayDate, "MM.dd")}</span>
-                 <span className={clsx("text-sm font-bold", isToday(dayDate) ? "text-[#2D5A27]" : "text-slate-500")}>{format(dayDate, "EEE", { locale: zhTW }).toUpperCase()}</span>
-                 {isToday(dayDate) && <span className="text-[10px] bg-[#2D5A27] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0">TODAY</span>}
+                 <span className={clsx("font-black font-mono text-xl", isToday(dayDate) ? "text-[#1B4332]" : "text-slate-800")}>{format(dayDate, "MM.dd")}</span>
+                 <span className={clsx("text-sm font-bold", isToday(dayDate) ? "text-[#1B4332]" : "text-slate-500")}>{format(dayDate, "EEE", { locale: zhTW }).toUpperCase()}</span>
+                 {isToday(dayDate) && <span className="text-[10px] bg-[#1B4332] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0">TODAY</span>}
              </div>
          </div>
          <div className="p-4 flex-1 flex flex-col gap-6">
@@ -429,15 +432,15 @@ export const DailyManifest = () => {
         </div>
         
         <div className="flex flex-wrap items-center justify-end gap-2 w-full xl:w-auto">
-          {(appUser?.role === 'driver' || appUser?.role === 'admin') && (
+          {appUser?.role === 'admin' && (
             <button 
               onClick={() => {
                 setAddDateStr(format(baseDate, "yyyy-MM-dd"));
                 setShowAddForm(true);
               }} 
-              className="text-sm font-bold text-white bg-[#D35400] px-4 py-2 rounded-xl transition-colors hover:bg-[#b04500] flex items-center gap-1 shadow-sm shrink-0"
+              className="text-sm font-black text-white bg-[#1B4332] px-5 py-2.5 rounded-2xl transition-all hover:bg-slate-900 flex items-center gap-2 shadow-lg shadow-emerald-900/10 shrink-0 active:scale-95"
             >
-              <Plus className="w-4 h-4" /> 代填登記
+              <Plus className="w-4 h-4" /> 櫃台代填登記
             </button>
           )}
 
@@ -445,15 +448,15 @@ export const DailyManifest = () => {
             <RefreshCw className={clsx("w-4 h-4", loading && "animate-spin text-[#D35400]")} />
           </button>
 
-          <div className="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl shadow-sm overflow-x-auto w-full sm:w-auto mt-2 sm:mt-0 xl:w-auto">
-             <button onClick={() => setBaseDate(new Date())} className={clsx("text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors flex-1 sm:flex-none", isToday(baseDate) ? "bg-[#2D5A27] text-white" : "text-slate-600 hover:bg-slate-50")}>回到今天</button>
+          <div className="flex items-center gap-1 bg-white border border-slate-100 p-1 rounded-xl shadow-sm overflow-x-auto w-full sm:w-auto mt-2 sm:mt-0 xl:w-auto">
+             <button onClick={() => setBaseDate(new Date())} className={clsx("text-[10px] uppercase tracking-widest font-black px-4 py-2 rounded-lg whitespace-nowrap transition-all flex-1 sm:flex-none", isToday(baseDate) ? "bg-[#1B4332] text-white shadow-md shadow-emerald-900/10" : "text-slate-400 hover:bg-slate-50 hover:text-emerald-800")}>回到今天</button>
           </div>
 
-          <div className="flex items-center justify-between space-x-1 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 xl:w-auto">
-            <button onClick={() => setBaseDate(subDays(baseDate, 3))} className="p-2 bg-white shadow-sm hover:shadow text-slate-700 rounded-xl transition-all" title="前三天">
+          <div className="flex items-center justify-between space-x-1 bg-white p-1.5 rounded-2xl border border-slate-100 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 xl:w-auto">
+            <button onClick={() => setBaseDate(subDays(baseDate, 3))} className="p-2 bg-slate-50 shadow-sm hover:shadow text-slate-700 rounded-xl transition-all" title="前三天">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="flex flex-col items-center justify-center min-w-[150px] relative">
+            <div className="flex flex-col items-center justify-center min-w-[150px] relative px-4">
                <input 
                  type="date" 
                  value={format(baseDate, 'yyyy-MM-dd')}
@@ -464,11 +467,11 @@ export const DailyManifest = () => {
                  }}
                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                />
-               <span className="text-sm font-bold text-slate-900 font-mono pointer-events-none">
+               <span className="text-sm font-black text-[#1B4332] font-mono pointer-events-none">
                 {format(baseDate, "MM.dd")} - {format(addDays(baseDate, 2), "MM.dd")}
               </span>
             </div>
-            <button onClick={() => setBaseDate(addDays(baseDate, 3))} className="p-2 bg-white shadow-sm hover:shadow text-slate-700 rounded-xl transition-all" title="後三天">
+            <button onClick={() => setBaseDate(addDays(baseDate, 3))} className="p-2 bg-slate-50 shadow-sm hover:shadow text-slate-700 rounded-xl transition-all" title="後三天">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
@@ -476,17 +479,17 @@ export const DailyManifest = () => {
       </div>
 
       {showAddForm && (
-        <div className="bg-white rounded-[2.5rem] border-2 border-orange-500/30 p-8 shadow-xl relative animate-in fade-in slide-in-from-top-4 z-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-white to-orange-50/40">
-           <button onClick={() => setShowAddForm(false)} className="absolute top-6 right-6 p-2.5 text-slate-400 hover:text-orange-600 bg-slate-50 hover:bg-orange-50 rounded-2xl transition-all shadow-sm">
+        <div className="bg-white rounded-[2.5rem] border-2 border-emerald-500/20 p-8 shadow-2xl relative animate-in fade-in slide-in-from-top-4 z-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-white to-emerald-50/40">
+           <button onClick={() => setShowAddForm(false)} className="absolute top-6 right-6 p-2.5 text-slate-400 hover:text-emerald-600 bg-slate-50 hover:bg-emerald-50 rounded-2xl transition-all shadow-sm">
               <X className="w-5 h-5" />
            </button>
            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+              <div className="w-12 h-12 bg-[#1B4332] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-900/10">
                 <Plus className="w-7 h-7" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-slate-900 leading-tight">司機代填乘車登記</h2>
-                <p className="text-xs font-bold text-orange-600/70 tracking-widest uppercase">Proxy Registration Form</p>
+                <h2 className="text-2xl font-black text-slate-900 leading-tight">櫃台代填乘車登記</h2>
+                <p className="text-xs font-black text-emerald-600 tracking-widest uppercase opacity-60">Admin Proxy Registration</p>
               </div>
            </div>
            
@@ -554,8 +557,8 @@ export const DailyManifest = () => {
               </div>
 
               <div className="md:col-span-4 flex justify-end mt-4 w-full">
-                 <button disabled={adding} type="submit" className="w-full md:w-auto bg-orange-600 text-white px-10 py-4 rounded-2xl font-black text-lg hover:bg-orange-700 transition-all shadow-xl shadow-orange-200 disabled:opacity-50 active:scale-95 flex items-center justify-center gap-2">
-                    {adding ? "儲存中..." : (<><RefreshCw className="w-5 h-5" /> 立即登記資料</>)}
+                 <button disabled={adding} type="submit" className="w-full md:w-auto bg-[#1B4332] text-white px-10 py-4 rounded-2xl font-black text-lg hover:bg-slate-900 transition-all shadow-xl shadow-emerald-900/10 disabled:opacity-50 active:scale-95 flex items-center justify-center gap-2">
+                    {adding ? "儲存中..." : (<><RefreshCw className="w-5 h-5" /> 立即新增登記</>)}
                  </button>
               </div>
            </form>

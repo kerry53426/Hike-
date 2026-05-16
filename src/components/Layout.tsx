@@ -9,15 +9,15 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col p-4 sm:p-6 font-sans text-slate-800">
+    <div className="min-h-screen w-full bg-[#fdfcfb] flex flex-col p-4 sm:p-6 font-sans text-slate-800 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
       <header className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6 w-full max-w-6xl mx-auto">
         <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#2D5A27] mb-1 flex items-center gap-1">
-            <Mountain className="w-4 h-4 shrink-0" />
-            <span className="truncate">SHEI-PA LEISURE FARM</span>
+          <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#1B4332] mb-1 flex items-center gap-1.5 opacity-80">
+            <Mountain className="w-4 h-4 shrink-0 fill-[#1B4332]/10" />
+            <span className="truncate">SHEI-PA LEISURE FARM / 雪霸農場</span>
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 leading-none">
-            交通接駁登記 <span className="text-[#2D5A27] text-2xl sm:text-3xl ml-1">{new Date().getMonth() + 1}月</span>
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 leading-none tracking-tighter">
+            交通接駁系統 <span className="text-[#2D5A27] text-2xl sm:text-3xl ml-1 font-serif italic border-b-4 border-[#2D5A27]/20">{new Date().getMonth() + 1}月</span>
           </h1>
         </div>
         
@@ -82,14 +82,14 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
 
       {user && !loading && (
         <div className="mb-6 flex flex-wrap gap-2 sm:gap-3 w-full max-w-6xl mx-auto">
-            {appUser?.role !== 'driver' && (
+            {appUser?.role === 'employee' && (
               <button
                 onClick={() => setActiveTab('my-schedule')}
                 className={clsx(
-                  "px-4 sm:px-5 py-2.5 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none",
+                  "px-5 sm:px-6 py-3 rounded-2xl font-black flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none uppercase tracking-widest text-xs",
                   activeTab === 'my-schedule' 
-                    ? "bg-[#2D5A27] text-white" 
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                    ? "bg-[#1B4332] text-white shadow-lg shadow-emerald-900/20" 
+                    : "bg-white border border-slate-200 text-slate-500 hover:text-[#1B4332] hover:border-emerald-200"
                 )}
               >
                 <Calendar className="w-4 h-4 shrink-0" />
@@ -100,14 +100,14 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
             <button
                 onClick={() => setActiveTab('daily-manifest')}
                 className={clsx(
-                  "px-4 sm:px-5 py-2.5 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none",
+                  "px-5 sm:px-6 py-3 rounded-2xl font-black flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none uppercase tracking-widest text-xs",
                   activeTab === 'daily-manifest' 
-                    ? "bg-[#2D5A27] text-white" 
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                    ? "bg-[#1B4332] text-white shadow-lg shadow-emerald-900/20" 
+                    : "bg-white border border-slate-200 text-slate-500 hover:text-[#1B4332] hover:border-emerald-200"
                 )}
               >
                 <Bus className="w-4 h-4 shrink-0" />
-                <span className="whitespace-nowrap">每日接駁名單</span>
+                <span className="whitespace-nowrap">{appUser?.role === 'admin' ? '代填與管理' : '每日接駁名單'}</span>
               </button>
         </div>
       )}
@@ -118,11 +118,12 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2D5A27]"></div>
           </div>
         ) : !user ? (
-          <div className="bg-white rounded-[2rem] border border-slate-200 p-10 flex flex-col items-center shadow-sm max-w-md mx-auto mt-10">
-            <Mountain className="w-16 h-16 text-[#2D5A27] mx-auto mb-6 opacity-80" />
-            <h2 className="text-2xl font-black text-slate-900 mb-2">歡迎使用接駁系統</h2>
-            <p className="text-slate-500 mb-6 font-medium">
-              {loginRole === 'employee' ? '請輸入您的姓名以登入系統。' : '請輸入密碼以登入。'}
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 flex flex-col items-center shadow-xl max-w-md mx-auto mt-10 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-[#1B4332]"></div>
+            <Mountain className="w-20 h-20 text-[#1B4332] mx-auto mb-8 opacity-20" />
+            <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter">雪霸交通接駁</h2>
+            <p className="text-slate-500 mb-8 font-bold text-sm text-center">
+              {loginRole === 'employee' ? '歡迎回來！請輸入您的姓名登入。' : '系統後台，請輸入存取密碼。'}
             </p>
             <form onSubmit={(e) => {
                 e.preventDefault();
@@ -137,23 +138,33 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
                   }
                 }
 
-                const name = role === 'employee' ? (fd.get('name') as string) : (role === 'driver' ? '司機專用' : '櫃台專用');
+                const name = role === 'employee' ? (fd.get('name') as string) : (role === 'driver' ? '司機專用' : '櫃台管理員');
                 if (name.trim()) {
                   login(name.trim(), role);
                 }
               }} className="w-full flex flex-col gap-4">
-              <select name="role" value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium text-slate-700 bg-white">
-                <option value="employee">一般員工</option>
-                <option value="driver">司機</option>
-                <option value="admin">櫃台</option>
-              </select>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">登入身分 LOGIN AS</label>
+                <select name="role" value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:border-[#1B4332] focus:ring-4 focus:ring-emerald-600/5 transition-all font-black text-slate-700 bg-slate-50 shadow-inner">
+                  <option value="employee">一般員工 Staff</option>
+                  <option value="driver">司機 Driver</option>
+                  <option value="admin">櫃台 Reception</option>
+                </select>
+              </div>
+
               {loginRole === 'employee' ? (
-                <input name="name" required placeholder="您的姓名 (例: 王小明)" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium" />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">您的姓名 NAME</label>
+                  <input name="name" required placeholder="例: 王小明" className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:border-[#1B4332] focus:ring-4 focus:ring-emerald-600/5 transition-all font-black text-lg" />
+                </div>
               ) : (
-                <input type="password" name="password" required placeholder="請輸入密碼" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium" />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">存取密碼 PASSWORD</label>
+                  <input type="password" name="password" required placeholder="請輸入密碼" className="w-full px-5 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:border-[#1B4332] focus:ring-4 focus:ring-emerald-600/5 transition-all font-black" />
+                </div>
               )}
-              <button type="submit" className="w-full bg-[#2D5A27] hover:bg-[#1f3f1b] text-white px-6 py-3 rounded-xl font-bold shadow-sm transition-all mt-4">
-                開始使用
+              <button type="submit" className="w-full bg-[#1B4332] hover:bg-slate-900 text-white px-6 py-4 rounded-2xl font-black shadow-lg shadow-emerald-900/10 transition-all mt-4 text-lg active:scale-95">
+                登入系統
               </button>
             </form>
           </div>

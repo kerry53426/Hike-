@@ -10,9 +10,9 @@ import clsx from "clsx";
 export const MySchedule = () => {
   const { appUser, updatePhone } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [registrations, setRegistrations] = useState<Record<string, Registration>>({});
+  const [myRegistrations, setMyRegistrations] = useState<Record<string, Registration>>({});
+  const [allRegistrations, setAllRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
-  const [savingDate, setSavingDate] = useState<string | null>(null);
 
   const fetchRegistrations = async () => {
     if (!appUser) return;
@@ -21,14 +21,19 @@ export const MySchedule = () => {
     try {
       const data = await getRegistrations();
       const myData: Record<string, Registration> = {};
+      const allDataList: Registration[] = [];
       let foundPhone = "";
 
       Object.entries(data).forEach(([key, reg]) => {
+          if (!reg || reg.deleted) return;
+          
+          allDataList.push(reg);
+
           if (appUser.role === 'employee' && !appUser.phone && reg.userName === appUser.name && reg.phone && !foundPhone) {
               foundPhone = reg.phone;
           }
 
-          if (reg && reg.userId === appUser.uid && !reg.deleted) {
+          if (reg.userId === appUser.uid) {
               myData[reg.date] = reg;
           }
       });
@@ -37,7 +42,8 @@ export const MySchedule = () => {
           updatePhone(foundPhone);
       }
 
-      setRegistrations(myData);
+      setMyRegistrations(myData);
+      setAllRegistrations(allDataList);
     } catch (error) {
       console.error(error);
     } finally {
@@ -49,10 +55,24 @@ export const MySchedule = () => {
     fetchRegistrations();
   }, [appUser, currentDate]); // also fetch on mode change maybe, though pantry cloud gets all at once. Assuming getRegistrations gets all.
 
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentDate),
-    end: endOfMonth(currentDate),
-  });
+  const days = useMemo(() => {
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    const allDays = eachDayOfInterval({ start, end });
+    const today = startOfToday();
+    
+    // If current month, show from today onwards
+    if (format(currentDate, "yyyy-MM") === format(today, "yyyy-MM")) {
+      return allDays.filter(day => day >= today);
+    }
+    
+    // If past month, hide all
+    if (currentDate < startOfMonth(today)) {
+      return [];
+    }
+    
+    return allDays;
+  }, [currentDate]);
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -60,7 +80,7 @@ export const MySchedule = () => {
   const toggleStatus = async (dateStr: string, field: "goingUp" | "goingDown" | "stayingZhudong") => {
     if (!appUser) return;
     
-    const existing = registrations[dateStr];
+    const existing = myRegistrations[dateStr];
     
     const newState = existing 
       ? { ...existing, [field]: !existing[field] } 
@@ -79,7 +99,7 @@ export const MySchedule = () => {
     const isRemoving = existing && !newState.goingUp && !newState.goingDown && !newState.stayingZhudong && !newState.note;
 
     // Optimistic Update
-    setRegistrations(prev => {
+    setMyRegistrations(prev => {
       const next = { ...prev };
       if (isRemoving) {
         delete next[dateStr];
@@ -87,6 +107,13 @@ export const MySchedule = () => {
         next[dateStr] = { ...newState, updatedAt: new Date().toISOString() };
       }
       return next;
+    });
+
+    // Also update allRegistrations optimistically
+    setAllRegistrations(prev => {
+      const filtered = prev.filter(r => !(r.userId === appUser.uid && r.date === dateStr));
+      if (isRemoving) return filtered;
+      return [...filtered, { ...newState, updatedAt: new Date().toISOString() }];
     });
     
     try {
@@ -113,13 +140,13 @@ export const MySchedule = () => {
     let up = 0, down = 0, zhudong = 0;
     days.forEach(day => {
       const dateStr = format(day, "yyyy-MM-dd");
-      const reg = registrations[dateStr];
+      const reg = myRegistrations[dateStr];
       if (reg?.goingUp) up++;
       if (reg?.goingDown) down++;
       if (reg?.stayingZhudong) zhudong++;
     });
     return { up, down, zhudong };
-  }, [days, registrations]);
+  }, [days, myRegistrations]);
 
   // Show setup screen if employee hasn't entered phone number yet
   if (appUser?.role === 'employee' && !appUser.phone) {
@@ -236,40 +263,63 @@ export const MySchedule = () => {
             <div className="divide-y divide-slate-100/80 px-4 sm:px-8 pb-12">
               {days.map((day) => {
                 const dateStr = format(day, "yyyy-MM-dd");
-                const reg = registrations[dateStr];
+                const reg = myRegistrations[dateStr];
                 
                 const isRestricted = differenceInDays(startOfDay(day), todayDate) <= 2;
                 const isDisabled = isRestricted && appUser?.role === "employee";
+
+                // Find others for this day
+                const othersRegs = allRegistrations.filter(r => r.date === dateStr && r.userId !== appUser?.uid);
+                const othersUp = othersRegs.filter(r => r.goingUp).map(r => r.userName);
+                const othersDown = othersRegs.filter(r => r.goingDown).map(r => r.userName);
 
                 return (
                   <div 
                     key={dateStr} 
                     className={clsx(
-                      "flex flex-col md:grid md:grid-cols-4 gap-4 py-6 md:items-center group transition-all rounded-2xl px-4 md:px-0",
-                      isToday(day) && "bg-emerald-50/30 ring-1 ring-emerald-500/10 -mx-2 px-6",
-                      isDisabled && "opacity-40 grayscale-[0.5]"
+                      "flex flex-col md:grid md:grid-cols-4 gap-4 py-8 md:items-start group transition-all rounded-3xl",
+                      isToday(day) && "bg-[#1B4332]/5 ring-1 ring-[#1B4332]/10 -mx-4 px-8",
+                      isDisabled && "opacity-60"
                     )}
                   >
                     <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-4">
                        <div className={clsx(
-                         "w-12 h-12 flex flex-col items-center justify-center rounded-2xl shrink-0 transition-transform group-hover:scale-105 shadow-sm border",
-                         isToday(day) ? "bg-emerald-600 text-white border-emerald-500" : "bg-white text-slate-700 border-slate-100"
+                         "w-14 h-14 flex flex-col items-center justify-center rounded-2xl shrink-0 transition-all group-hover:shadow-lg shadow-sm border-2",
+                         isToday(day) ? "bg-[#1B4332] text-white border-[#1B4332]" : "bg-white text-slate-700 border-slate-100"
                        )}>
-                         <span className="text-[9px] font-black opacity-80 leading-none">{format(day, "EEE", { locale: zhTW })}</span>
-                         <span className="text-xl font-black leading-none">{format(day, "dd")}</span>
+                         <span className="text-[10px] font-black opacity-80 leading-none mb-1 uppercase">{format(day, "EEE", { locale: zhTW })}</span>
+                         <span className="text-2xl font-black leading-none">{format(day, "dd")}</span>
                        </div>
                        
                        <div className="flex flex-col flex-1">
                           <div className="flex items-center gap-2">
-                             <span className={clsx("font-black text-slate-900")}>
-                                {format(day, "MM月dd日")}
+                             <span className={clsx("font-black text-slate-900 text-lg")}>
+                                {format(day, "MM.dd")}
                              </span>
-                             {isToday(day) && <span className="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">TODAY</span>}
+                             {isToday(day) && <span className="text-[10px] bg-[#1B4332] text-white px-2 py-0.5 rounded-lg font-black uppercase tracking-widest shrink-0">TODAY</span>}
                           </div>
+                          
+                          {/* Others indicator */}
+                          <div className="mt-2 flex flex-col gap-1.5 translate-y-1">
+                             {othersDown.length > 0 && (
+                               <div className="flex items-center gap-1.5" title={othersDown.join(", ")}>
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                  <span className="text-[10px] font-bold text-slate-500"><span className="text-emerald-700">{othersDown.length}人</span> 已登記下山</span>
+                               </div>
+                             )}
+                             {othersUp.length > 0 && (
+                               <div className="flex items-center gap-1.5" title={othersUp.join(", ")}>
+                                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+                                  <span className="text-[10px] font-bold text-slate-500"><span className="text-amber-600">{othersUp.length}人</span> 已登記上山</span>
+                               </div>
+                             )}
+                             {othersRegs.length === 0 && !isDisabled && <span className="text-[10px] font-bold text-slate-300 italic">尚無其他員工登記</span>}
+                          </div>
+
                           {isDisabled && (
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold mt-0.5">
-                               <Lock className="w-3 h-3" />
-                               <span className="uppercase tracking-tighter">系統已鎖定</span>
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold mt-4 uppercase tracking-[0.2em]">
+                               <Lock className="w-3 h-3 text-slate-300" />
+                               <span>近三日已鎖定</span>
                             </div>
                           )}
                        </div>
