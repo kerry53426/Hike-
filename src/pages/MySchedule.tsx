@@ -291,9 +291,13 @@ export const MySchedule = () => {
       }
       setLastSaved(new Date().toLocaleTimeString());
       setTimeout(() => setLastSaved(null), 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("儲存失敗，請重試");
+      let errMsg = "儲存失敗，請重試";
+      if (error && error.message && error.message.includes("Failed to fetch")) {
+         errMsg = "儲存失敗 (網路連線異常或伺服器無回應)，請稍後再試";
+      }
+      alert(errMsg);
       fetchRegistrations(); // revert on failure
     }
   };

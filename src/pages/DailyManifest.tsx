@@ -328,8 +328,13 @@ export const DailyManifest = () => {
       setAddNote("");
       setShowAddForm(false);
       await fetchDailyData();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      let errMsg = "新增失敗，請重試";
+      if (error && error.message && error.message.includes("Failed to fetch")) {
+         errMsg = "新增失敗 (網路連線異常或伺服器無回應)，請稍後再試";
+      }
+      alert(errMsg);
     } finally {
       setAdding(false);
     }
