@@ -254,6 +254,7 @@ export const DailyManifest = () => {
   const [addDirection, setAddDirection] = useState<"up" | "down" | "stay">("down");
   const [addNote, setAddNote] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isStaffListExpanded, setIsStaffListExpanded] = useState(false);
 
   const filteredUsers = allUsers.filter(u => u.name.includes(searchTerm) || u.phone.includes(searchTerm));
 
@@ -385,70 +386,82 @@ export const DailyManifest = () => {
                 <div className="bg-white rounded-[2.5rem] border border-emerald-100 shadow-xl shadow-emerald-900/5 p-8 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                   <div className="relative z-10">
-                    <div className="flex items-center gap-4 mb-6">
-                       <div className="w-14 h-14 bg-[#1B4332] text-white rounded-2xl flex items-center justify-center shadow-lg">
-                         <Users className="w-7 h-7" />
+                    <div className="flex items-center justify-between gap-4 mb-6 relative z-20">
+                       <div className="flex items-center gap-4">
+                         <div className="w-14 h-14 bg-[#1B4332] text-white rounded-2xl flex items-center justify-center shadow-lg">
+                           <Users className="w-7 h-7" />
+                         </div>
+                         <div>
+                           <h2 className="text-2xl font-black text-slate-900 leading-tight">員工管理</h2>
+                           <p className="text-xs font-black text-emerald-600 tracking-widest uppercase opacity-60">Staff Directory</p>
+                         </div>
                        </div>
-                       <div>
-                         <h2 className="text-2xl font-black text-slate-900 leading-tight">員工管理</h2>
-                         <p className="text-xs font-black text-emerald-600 tracking-widest uppercase opacity-60">Staff Directory</p>
-                       </div>
+                       <button 
+                         onClick={() => setIsStaffListExpanded(!isStaffListExpanded)} 
+                         className="p-3 text-slate-400 bg-white hover:bg-slate-50 hover:text-emerald-700 rounded-2xl transition-all shadow-sm border border-slate-100"
+                       >
+                         {isStaffListExpanded ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+                       </button>
                     </div>
 
-                    <div className="relative mb-6">
-                       <input 
-                         type="text" 
-                         placeholder="搜尋姓名或電話..." 
-                         value={searchTerm}
-                         onChange={(e) => setSearchTerm(e.target.value)}
-                         className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-[#1B4332] transition-all font-bold text-slate-700 outline-none"
-                       />
-                       <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
-                    </div>
+                    {isStaffListExpanded && (
+                      <div className="animate-in fade-in slide-in-from-top-2">
+                        <div className="relative mb-6">
+                           <input 
+                             type="text" 
+                             placeholder="搜尋姓名或電話..." 
+                             value={searchTerm}
+                             onChange={(e) => setSearchTerm(e.target.value)}
+                             className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-[#1B4332] transition-all font-bold text-slate-700 outline-none"
+                           />
+                           <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                        </div>
 
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 no-scrollbar">
-                       {filteredUsers.length === 0 ? (
-                         <div className="text-center py-10 text-slate-300 font-bold italic">找不到員工資料</div>
-                       ) : (
-                         filteredUsers.map(u => (
-                           <div key={u.name} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-transparent hover:border-emerald-200 hover:bg-white transition-all group">
-                              <div className="flex items-center gap-3">
-                                 <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center font-black text-emerald-600 shadow-sm">
-                                    {u.name.charAt(0)}
-                                 </div>
-                                 <div className="flex flex-col">
-                                    <span className="font-bold text-slate-700">{u.name}</span>
-                                    <span className="text-[10px] font-mono text-slate-400">{u.phone || "未留電話"}</span>
-                                 </div>
-                              </div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                 {u.phone && (
-                                   <a href={`tel:${u.phone}`} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg">
-                                     <Phone className="w-4 h-4" />
-                                   </a>
-                                 )}
-                                 <button 
-                                   onClick={() => handleDeleteUser(u.name)}
-                                   className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"
-                                 >
-                                   <Trash2 className="w-4 h-4" />
-                                 </button>
-                                 <button 
-                                   onClick={() => {
-                                      setAddName(u.name);
-                                      setAddPhone(u.phone || "");
-                                      setShowAddForm(true);
-                                   }}
-                                   className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"
-                                   title="代填登記"
-                                 >
-                                   <Plus className="w-4 h-4" />
-                                 </button>
-                              </div>
-                           </div>
-                         ))
-                       )}
-                    </div>
+                        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 no-scrollbar">
+                           {filteredUsers.length === 0 ? (
+                             <div className="text-center py-10 text-slate-300 font-bold italic">找不到員工資料</div>
+                           ) : (
+                             filteredUsers.map(u => (
+                               <div key={u.name} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-transparent hover:border-emerald-200 hover:bg-white transition-all group">
+                                  <div className="flex items-center gap-3">
+                                     <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center font-black text-emerald-600 shadow-sm">
+                                        {u.name.charAt(0)}
+                                     </div>
+                                     <div className="flex flex-col">
+                                        <span className="font-bold text-slate-700">{u.name}</span>
+                                        <span className="text-[10px] font-mono text-slate-400">{u.phone || "未留電話"}</span>
+                                     </div>
+                                  </div>
+                                  <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                                     {u.phone && (
+                                       <a href={`tel:${u.phone}`} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg">
+                                         <Phone className="w-4 h-4" />
+                                       </a>
+                                     )}
+                                     <button 
+                                       onClick={() => handleDeleteUser(u.name)}
+                                       className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                                     >
+                                       <Trash2 className="w-4 h-4" />
+                                     </button>
+                                     <button 
+                                       onClick={() => {
+                                          setAddName(u.name);
+                                          setAddPhone(u.phone || "");
+                                          setShowAddForm(true);
+                                       }}
+                                       className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"
+                                       title="代填登記"
+                                     >
+                                       <Plus className="w-4 h-4" />
+                                     </button>
+                                  </div>
+                               </div>
+                             ))
+                           )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
