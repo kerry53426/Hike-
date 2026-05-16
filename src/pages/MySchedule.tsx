@@ -176,6 +176,7 @@ export const MySchedule = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<Record<string, Registration | null>>({});
 
   const fetchRegistrations = async () => {
     if (!appUser) return;
@@ -278,17 +279,29 @@ export const MySchedule = () => {
       if (isRemoving) return filtered;
       return [...filtered, { ...newState, updatedAt: new Date().toISOString() }];
     });
-    
+
+    setPendingChanges(prev => ({
+      ...prev,
+      [dateStr]: isRemoving ? null : newState
+    }));
+  };
+
+  const handleSaveAll = async () => {
+    if (Object.keys(pendingChanges).length === 0) return;
+    setSaving(true);
     try {
-      if (isRemoving) {
-        await updateRegistration(docId, { deleted: true });
-      } else {
-        const payload = {
-          ...newState,
-          updatedAt: new Date().toISOString(),
-        };
-        await updateRegistration(docId, payload);
+      for (const [dateStr, value] of Object.entries(pendingChanges)) {
+        const docId = `${appUser!.uid}_${dateStr}`;
+        if (value === null) {
+          await updateRegistration(docId, { deleted: true });
+        } else {
+          await updateRegistration(docId, {
+            ...value,
+            updatedAt: new Date().toISOString(),
+          } as Registration);
+        }
       }
+      setPendingChanges({});
       setLastSaved(new Date().toLocaleTimeString());
       setTimeout(() => setLastSaved(null), 3000);
     } catch (error: any) {
@@ -298,7 +311,10 @@ export const MySchedule = () => {
          errMsg = "儲存失敗 (網路連線異常或伺服器無回應)，請稍後再試";
       }
       alert(errMsg);
-      fetchRegistrations(); // revert on failure
+      // Wait for alert to close before refetching
+      await fetchRegistrations(); 
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -465,6 +481,19 @@ export const MySchedule = () => {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {Object.keys(pendingChanges).length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-[2rem] shadow-2xl flex items-center justify-between gap-6 z-50 animate-in slide-in-from-bottom-8 border border-slate-700 w-fit shrink-0">
+          <div className="flex flex-col whitespace-nowrap">
+            <span className="font-bold text-sm">有未儲存的變更</span>
+            <span className="text-[10px] text-emerald-400">請記得點擊儲存</span>
+          </div>
+          <button onClick={handleSaveAll} disabled={saving} className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-full font-black text-sm transition-all shadow-lg shadow-emerald-900/50 active:scale-95 disabled:opacity-50 flex items-center gap-2 whitespace-nowrap shrink-0">
+            {saving ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <CheckCircle2 className="w-4 h-4 shrink-0" />}
+            {saving ? "儲存中..." : "立即儲存"}
+          </button>
         </div>
       )}
     </div>
