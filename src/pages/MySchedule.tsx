@@ -7,6 +7,167 @@ import { useAuth } from "../lib/auth";
 import { Registration } from "../types";
 import clsx from "clsx";
 
+const ScheduleRow = ({ 
+  day, 
+  todayDate, 
+  appUser, 
+  myRegistrations, 
+  allRegistrations, 
+  toggleStatus 
+}: { 
+  day: Date, 
+  todayDate: Date, 
+  appUser: any, 
+  myRegistrations: Record<string, Registration>, 
+  allRegistrations: Registration[],
+  toggleStatus: (dateStr: string, field: "goingUp" | "goingDown" | "stayingZhudong") => void,
+  key?: string
+}) => {
+  const [showOthers, setShowOthers] = useState(false);
+  const dateStr = format(day, "yyyy-MM-dd");
+  const reg = myRegistrations[dateStr];
+  
+  const isRestricted = differenceInDays(startOfDay(day), todayDate) <= 2;
+  const isDisabled = isRestricted && appUser?.role === "employee";
+
+  // Find others for this day
+  const othersRegs = allRegistrations.filter(r => r.date === dateStr && r.userId !== appUser?.uid);
+  const othersUp = othersRegs.filter(r => r.goingUp).map(r => r.userName);
+  const othersDown = othersRegs.filter(r => r.goingDown).map(r => r.userName);
+
+  return (
+    <div 
+      className={clsx(
+        "flex flex-col md:grid md:grid-cols-4 gap-4 py-8 md:items-start group transition-all rounded-3xl",
+        isToday(day) && "bg-[#1B4332]/5 ring-1 ring-[#1B4332]/10 -mx-4 px-8",
+        isDisabled && "opacity-60"
+      )}
+    >
+      <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-4">
+         <div className={clsx(
+           "w-14 h-14 flex flex-col items-center justify-center rounded-2xl shrink-0 transition-all group-hover:shadow-lg shadow-sm border-2",
+           isToday(day) ? "bg-[#1B4332] text-white border-[#1B4332]" : "bg-white text-slate-700 border-slate-100"
+         )}>
+           <span className="text-[10px] font-black opacity-80 leading-none mb-1 uppercase">{format(day, "EEE", { locale: zhTW })}</span>
+           <span className="text-2xl font-black leading-none">{format(day, "dd")}</span>
+         </div>
+         
+         <div className="flex flex-col flex-1">
+            <div className="flex items-center gap-2">
+               <span className={clsx("font-black text-slate-900 text-lg")}>
+                  {format(day, "MM.dd")}
+               </span>
+               {isToday(day) && <span className="text-[10px] bg-[#1B4332] text-white px-2 py-0.5 rounded-lg font-black uppercase tracking-widest shrink-0">TODAY</span>}
+            </div>
+            
+            {/* Others indicator */}
+            <div className="mt-2 flex flex-col gap-1.5 translate-y-1">
+               {othersDown.length > 0 && (
+                 <div className="flex flex-col gap-1">
+                    <button 
+                      onClick={() => setShowOthers(!showOthers)}
+                      className="flex items-center gap-1.5 hover:opacity-75 transition-opacity text-left outline-none"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">
+                        <span className="text-emerald-700">{othersDown.length}人</span> 已登記下山
+                        {showOthers ? " (收合)" : " (查看姓名)"}
+                      </span>
+                    </button>
+                    {showOthers && (
+                      <div className="pl-3 flex flex-wrap gap-1">
+                        {othersDown.map(name => (
+                          <span key={name} className="text-[9px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-md font-bold border border-emerald-100 animate-in fade-in zoom-in-95">{name}</span>
+                        ))}
+                      </div>
+                    )}
+                 </div>
+               )}
+               {othersUp.length > 0 && (
+                 <div className="flex flex-col gap-1">
+                    <button 
+                      onClick={() => setShowOthers(!showOthers)}
+                      className="flex items-center gap-1.5 hover:opacity-75 transition-opacity text-left outline-none"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+                      <span className="text-[10px] font-bold text-slate-500">
+                        <span className="text-amber-600">{othersUp.length}人</span> 已登記上山
+                        {showOthers ? " (收合)" : " (查看姓名)"}
+                      </span>
+                    </button>
+                    {showOthers && (
+                      <div className="pl-3 flex flex-wrap gap-1">
+                        {othersUp.map(name => (
+                          <span key={name} className="text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md font-bold border border-amber-100 animate-in fade-in zoom-in-95">{name}</span>
+                        ))}
+                      </div>
+                    )}
+                 </div>
+               )}
+               {othersRegs.length === 0 && !isDisabled && <span className="text-[10px] font-bold text-slate-300 italic">尚無其他員工登記</span>}
+            </div>
+
+            {isDisabled && (
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold mt-4 uppercase tracking-[0.2em]">
+                 <Lock className="w-3 h-3 text-slate-300" />
+                 <span>近三日已鎖定</span>
+              </div>
+            )}
+         </div>
+      </div>
+
+      <div className="w-full md:w-auto flex flex-row md:contents gap-2 items-stretch">
+        
+        {/* 下山 */}
+        <button
+          disabled={isDisabled}
+          onClick={() => toggleStatus(dateStr, "goingDown")}
+          className={clsx(
+            "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
+            reg?.goingDown 
+              ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200" 
+              : "bg-white border-slate-100 text-slate-400 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700",
+            isDisabled && "cursor-not-allowed opacity-50 gray"
+          )}
+        >
+          下山
+        </button>
+
+        {/* 上山 */}
+        <button
+          disabled={isDisabled}
+          onClick={() => toggleStatus(dateStr, "goingUp")}
+          className={clsx(
+            "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
+            reg?.goingUp 
+              ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200" 
+              : "bg-white border-slate-100 text-slate-400 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700",
+            isDisabled && "cursor-not-allowed opacity-50 gray"
+          )}
+        >
+          上山
+        </button>
+
+        {/* 竹東住宿 */}
+        <button
+          disabled={isDisabled}
+          onClick={() => toggleStatus(dateStr, "stayingZhudong")}
+          className={clsx(
+            "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
+            reg?.stayingZhudong 
+              ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200" 
+              : "bg-white border-slate-100 text-slate-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700",
+            isDisabled && "cursor-not-allowed opacity-50 gray"
+          )}
+        >
+          <span className="hidden sm:inline">竹東住宿</span>
+          <span className="sm:hidden">住宿</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const MySchedule = () => {
   const { appUser, updatePhone } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -261,121 +422,17 @@ export const MySchedule = () => {
             </div>
             
             <div className="divide-y divide-slate-100/80 px-4 sm:px-8 pb-12">
-              {days.map((day) => {
-                const dateStr = format(day, "yyyy-MM-dd");
-                const reg = myRegistrations[dateStr];
-                
-                const isRestricted = differenceInDays(startOfDay(day), todayDate) <= 2;
-                const isDisabled = isRestricted && appUser?.role === "employee";
-
-                // Find others for this day
-                const othersRegs = allRegistrations.filter(r => r.date === dateStr && r.userId !== appUser?.uid);
-                const othersUp = othersRegs.filter(r => r.goingUp).map(r => r.userName);
-                const othersDown = othersRegs.filter(r => r.goingDown).map(r => r.userName);
-
-                return (
-                  <div 
-                    key={dateStr} 
-                    className={clsx(
-                      "flex flex-col md:grid md:grid-cols-4 gap-4 py-8 md:items-start group transition-all rounded-3xl",
-                      isToday(day) && "bg-[#1B4332]/5 ring-1 ring-[#1B4332]/10 -mx-4 px-8",
-                      isDisabled && "opacity-60"
-                    )}
-                  >
-                    <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-4">
-                       <div className={clsx(
-                         "w-14 h-14 flex flex-col items-center justify-center rounded-2xl shrink-0 transition-all group-hover:shadow-lg shadow-sm border-2",
-                         isToday(day) ? "bg-[#1B4332] text-white border-[#1B4332]" : "bg-white text-slate-700 border-slate-100"
-                       )}>
-                         <span className="text-[10px] font-black opacity-80 leading-none mb-1 uppercase">{format(day, "EEE", { locale: zhTW })}</span>
-                         <span className="text-2xl font-black leading-none">{format(day, "dd")}</span>
-                       </div>
-                       
-                       <div className="flex flex-col flex-1">
-                          <div className="flex items-center gap-2">
-                             <span className={clsx("font-black text-slate-900 text-lg")}>
-                                {format(day, "MM.dd")}
-                             </span>
-                             {isToday(day) && <span className="text-[10px] bg-[#1B4332] text-white px-2 py-0.5 rounded-lg font-black uppercase tracking-widest shrink-0">TODAY</span>}
-                          </div>
-                          
-                          {/* Others indicator */}
-                          <div className="mt-2 flex flex-col gap-1.5 translate-y-1">
-                             {othersDown.length > 0 && (
-                               <div className="flex items-center gap-1.5" title={othersDown.join(", ")}>
-                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                  <span className="text-[10px] font-bold text-slate-500"><span className="text-emerald-700">{othersDown.length}人</span> 已登記下山</span>
-                               </div>
-                             )}
-                             {othersUp.length > 0 && (
-                               <div className="flex items-center gap-1.5" title={othersUp.join(", ")}>
-                                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                                  <span className="text-[10px] font-bold text-slate-500"><span className="text-amber-600">{othersUp.length}人</span> 已登記上山</span>
-                               </div>
-                             )}
-                             {othersRegs.length === 0 && !isDisabled && <span className="text-[10px] font-bold text-slate-300 italic">尚無其他員工登記</span>}
-                          </div>
-
-                          {isDisabled && (
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold mt-4 uppercase tracking-[0.2em]">
-                               <Lock className="w-3 h-3 text-slate-300" />
-                               <span>近三日已鎖定</span>
-                            </div>
-                          )}
-                       </div>
-                    </div>
-
-                    <div className="w-full md:w-auto flex flex-row md:contents gap-2 items-stretch">
-                      
-                      {/* 下山 */}
-                      <button
-                        disabled={isDisabled}
-                        onClick={() => toggleStatus(dateStr, "goingDown")}
-                        className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
-                          reg?.goingDown 
-                            ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200" 
-                            : "bg-white border-slate-100 text-slate-400 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700",
-                          isDisabled && "cursor-not-allowed opacity-50 gray"
-                        )}
-                      >
-                        下山
-                      </button>
-
-                      {/* 上山 */}
-                      <button
-                        disabled={isDisabled}
-                        onClick={() => toggleStatus(dateStr, "goingUp")}
-                        className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
-                          reg?.goingUp 
-                            ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200" 
-                            : "bg-white border-slate-100 text-slate-400 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700",
-                          isDisabled && "cursor-not-allowed opacity-50 gray"
-                        )}
-                      >
-                        上山
-                      </button>
-
-                      {/* 竹東住宿 */}
-                      <button
-                        disabled={isDisabled}
-                        onClick={() => toggleStatus(dateStr, "stayingZhudong")}
-                        className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
-                          reg?.stayingZhudong 
-                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200" 
-                            : "bg-white border-slate-100 text-slate-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700",
-                          isDisabled && "cursor-not-allowed opacity-50 gray"
-                        )}
-                      >
-                        <span className="hidden sm:inline">竹東住宿</span>
-                        <span className="sm:hidden">住宿</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+              {days.map((day) => (
+                <ScheduleRow 
+                  key={format(day, "yyyy-MM-dd")}
+                  day={day}
+                  todayDate={todayDate}
+                  appUser={appUser}
+                  myRegistrations={myRegistrations}
+                  allRegistrations={allRegistrations}
+                  toggleStatus={toggleStatus}
+                />
+              ))}
             </div>
           </div>
         </div>

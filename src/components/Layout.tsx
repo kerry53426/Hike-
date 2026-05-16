@@ -97,7 +97,8 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               </button>
             )}
             
-            <button
+            {appUser?.role !== 'employee' && (
+              <button
                 onClick={() => setActiveTab('daily-manifest')}
                 className={clsx(
                   "px-5 sm:px-6 py-3 rounded-2xl font-black flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none uppercase tracking-widest text-xs",
@@ -109,6 +110,7 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
                 <Bus className="w-4 h-4 shrink-0" />
                 <span className="whitespace-nowrap">{appUser?.role === 'admin' ? '代填與管理' : '每日接駁名單'}</span>
               </button>
+            )}
         </div>
       )}
 
