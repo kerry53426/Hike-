@@ -21,7 +21,7 @@ export const getRegistrations = async (): Promise<Record<string, Registration>> 
 
 export const updateRegistration = async (docId: string, payload: Registration | {deleted: true}) => {
    await fetch(BASE_URL, {
-       method: "POST",
+       method: "PUT",
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({ [docId]: payload })
    });

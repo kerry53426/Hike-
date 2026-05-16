@@ -27,7 +27,7 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               <div className="flex bg-white border border-slate-200 px-3 sm:px-4 py-2 rounded-xl items-center gap-2 shadow-sm relative group cursor-pointer hover:bg-slate-50 transition-colors flex-1 sm:flex-none justify-center" role="button" onClick={() => appUser?.role === 'employee' && setShowPhoneEdit(true)}>
                 <div className="w-2 h-2 rounded-full bg-[#27AE60] animate-pulse shrink-0"></div>
                 <span className="text-sm font-bold text-slate-700 select-none truncate">
-                  {appUser?.name} <span className="opacity-60 text-xs ml-1 hidden sm:inline">({appUser?.role === 'driver' ? '司機' : appUser?.role === 'admin' ? '管理員' : '員工'})</span>
+                  {appUser?.name} <span className="opacity-60 text-xs ml-1 hidden sm:inline">({appUser?.role === 'driver' ? '司機' : appUser?.role === 'admin' ? '櫃台' : '員工'})</span>
                 </span>
                 {appUser?.role === 'employee' && (
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
@@ -97,8 +97,7 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               </button>
             )}
             
-            {(appUser?.role === 'driver' || appUser?.role === 'admin') && (
-              <button
+            <button
                 onClick={() => setActiveTab('daily-manifest')}
                 className={clsx(
                   "px-4 sm:px-5 py-2.5 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all shadow-sm flex-1 sm:flex-none",
@@ -110,7 +109,6 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
                 <Bus className="w-4 h-4 shrink-0" />
                 <span className="whitespace-nowrap">每日接駁名單</span>
               </button>
-            )}
         </div>
       )}
 
@@ -123,14 +121,23 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
           <div className="bg-white rounded-[2rem] border border-slate-200 p-10 flex flex-col items-center shadow-sm max-w-md mx-auto mt-10">
             <Mountain className="w-16 h-16 text-[#2D5A27] mx-auto mb-6 opacity-80" />
             <h2 className="text-2xl font-black text-slate-900 mb-2">歡迎使用接駁系統</h2>
-            <p className="text-slate-500 mb-8 font-medium">
-              {loginRole === 'employee' ? '請輸入您的姓名以登入系統。' : '請直接登入系統。'}
+            <p className="text-slate-500 mb-6 font-medium">
+              {loginRole === 'employee' ? '請輸入您的姓名以登入系統。' : '請輸入密碼以登入。'}
             </p>
             <form onSubmit={(e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
                 const role = loginRole;
-                const name = role === 'employee' ? (fd.get('name') as string) : (role === 'driver' ? '司機' : '管理員');
+                const password = fd.get('password') as string;
+                
+                if (role !== 'employee') {
+                  if (password !== '8888') {
+                    alert('密碼錯誤！');
+                    return;
+                  }
+                }
+
+                const name = role === 'employee' ? (fd.get('name') as string) : (role === 'driver' ? '司機專用' : '櫃台專用');
                 if (name.trim()) {
                   login(name.trim(), role);
                 }
@@ -138,10 +145,12 @@ export const Layout = ({ children, activeTab, setActiveTab }: { children: ReactN
               <select name="role" value={loginRole} onChange={e => setLoginRole(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium text-slate-700 bg-white">
                 <option value="employee">一般員工</option>
                 <option value="driver">司機</option>
-                <option value="admin">管理員</option>
+                <option value="admin">櫃台</option>
               </select>
-              {loginRole === 'employee' && (
+              {loginRole === 'employee' ? (
                 <input name="name" required placeholder="您的姓名 (例: 王小明)" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium" />
+              ) : (
+                <input type="password" name="password" required placeholder="請輸入密碼" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#2D5A27] focus:ring-2 focus:ring-[#2D5A27]/20 transition-all font-medium" />
               )}
               <button type="submit" className="w-full bg-[#2D5A27] hover:bg-[#1f3f1b] text-white px-6 py-3 rounded-xl font-bold shadow-sm transition-all mt-4">
                 開始使用

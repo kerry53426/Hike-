@@ -25,7 +25,7 @@ function AppContent() {
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
       {activeTab === "my-schedule" && appUser?.role !== "driver" ? <MySchedule /> : null}
-      {activeTab === "daily-manifest" && (appUser?.role === "driver" || appUser?.role === "admin") ? <DailyManifest /> : null}
+      {activeTab === "daily-manifest" ? <DailyManifest /> : null}
       {activeTab === "my-schedule" && appUser?.role === "driver" && <DailyManifest /> /* Fallback */}
     </Layout>
   );

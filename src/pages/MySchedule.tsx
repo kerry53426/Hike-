@@ -126,87 +126,114 @@ export const MySchedule = () => {
     if (loading) {
        return (
         <div className="flex-1 flex justify-center items-center h-full min-h-[400px]">
-           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D35400]"></div>
+           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
         </div>
        );
     }
     return (
-      <div className="bg-white rounded-[2rem] border border-slate-200 p-10 max-w-md mx-auto mt-10 shadow-sm flex flex-col items-center">
-         <h2 className="text-2xl font-black text-slate-900 mb-2">聯絡方式設定</h2>
-         <p className="text-slate-500 mb-8 font-medium text-sm text-center">為了讓司機方便聯絡接駁事宜，請輸入您的聯絡電話。填寫後將記錄於系統中，未來登入不再顯示。</p>
+      <div className="bg-white rounded-[2.5rem] border border-slate-200 p-10 max-w-md mx-auto mt-10 shadow-xl flex flex-col items-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-white to-emerald-50/30">
+         <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 shadow-sm">
+            <RefreshCw className="w-8 h-8" />
+         </div>
+         <h2 className="text-2xl font-black text-slate-900 mb-2 underline decoration-emerald-500/30 underline-offset-4">聯絡方式設定</h2>
+         <p className="text-slate-500 mb-8 font-bold text-xs text-center leading-relaxed px-4 opacity-80 uppercase tracking-widest">
+           Please provide your contact number for logistics coordination.
+         </p>
          <form 
-           className="w-full"
+           className="w-full space-y-4"
            onSubmit={(e) => {
              e.preventDefault();
              const phone = (new FormData(e.currentTarget)).get('phone') as string;
              if (phone.trim()) updatePhone(phone.trim());
            }}
          >
-           <input name="phone" required placeholder="例如: 0912345678" className="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-[#D35400]/20 focus:border-[#D35400] outline-none font-medium" />
-           <button className="w-full bg-[#D35400] text-white font-bold py-3 rounded-xl shadow-sm hover:bg-[#b04500] transition-colors">確認送出</button>
+           <div className="flex flex-col gap-2">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">聯絡電話 Phone Number</label>
+             <input name="phone" required placeholder="例如: 0912345678" className="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none font-bold text-lg text-slate-800 transition-all shadow-sm" />
+           </div>
+           <button className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-emerald-600 transition-all active:scale-95 text-lg">
+             確認儲存並開始使用
+           </button>
          </form>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full h-full">
-      <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/50">
+    <div className="bg-white rounded-[2.5rem] shadow-md border border-slate-200 overflow-hidden flex flex-col w-full h-full">
+      <div className="p-5 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 mb-1">排班登記</h2>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">只能填寫三天後的資訊，近三日請聯繫司機代填</span>
+          <h2 className="text-3xl font-black text-slate-900 mb-1">排班登記</h2>
+          <div className="flex items-center gap-2">
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+               <Lock className="w-3 h-3" /> 近三日已鎖定
+             </span>
+             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">三日後可自由修改</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-1 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
-          <button onClick={fetchRegistrations} title="重新整理取得最新資料" className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors hidden sm:block">
-            <RefreshCw className={clsx("w-5 h-5", loading && "animate-spin text-[#2D5A27]")} />
+        <div className="flex items-center space-x-1 bg-slate-100 p-1.5 rounded-[1.5rem] border border-slate-200 shadow-inner w-full sm:w-auto justify-between sm:justify-start">
+          <button onClick={fetchRegistrations} title="重新整理取得最新資料" className="p-2.5 hover:bg-white text-slate-600 rounded-2xl transition-all hover:shadow-sm hidden sm:block">
+            <RefreshCw className={clsx("w-5 h-5 transition-transform duration-700", loading && "animate-spin text-emerald-600")} />
           </button>
-          <div className="w-px h-5 bg-slate-200 mx-1 hidden sm:block"></div>
-          <button onClick={prevMonth} className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors">
-            <ChevronLeft className="w-5 h-5" />
+          <div className="w-px h-6 bg-slate-200 mx-2 hidden sm:block"></div>
+          <button onClick={prevMonth} className="p-2.5 hover:bg-white text-slate-700 rounded-2xl transition-all hover:shadow-sm">
+            <ChevronLeft className="w-6 h-6" />
           </button>
-          <span className="text-base font-bold text-slate-900 min-w-[100px] text-center tracking-wide font-mono flex-1 sm:flex-none">
+          <span className="text-xl font-black text-slate-900 min-w-[140px] text-center tracking-tighter font-mono flex-1 sm:flex-none">
             {format(currentDate, "yyyy . MM")}
           </span>
-          <button onClick={nextMonth} className="p-2 hover:bg-slate-50 text-slate-600 rounded-xl transition-colors">
-            <ChevronRight className="w-5 h-5" />
+          <button onClick={nextMonth} className="p-2.5 hover:bg-white text-slate-700 rounded-2xl transition-all hover:shadow-sm">
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="p-12 text-center flex flex-col items-center flex-1 justify-center min-h-[300px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2D5A27] mb-4"></div>
+        <div className="p-12 text-center flex flex-col items-center flex-1 justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">正在載入排班資訊...</p>
         </div>
       ) : (
         <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Quick Panel for current month */}
-          <div className="bg-[#f8f9fa] border-b border-slate-100 p-4 flex flex-col sm:flex-row items-center gap-4 text-sm font-bold shadow-inner">
-             <div className="flex items-center gap-2 text-slate-500 shrink-0">
-               <BarChart2 className="w-4 h-4" />
-               本月統計
+          {/* Enhanced Month Stats Panel */}
+          <div className="bg-[#f8f9fa] border-b border-slate-100 p-4 sm:p-6 flex flex-col lg:flex-row items-center gap-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+             <div className="flex items-center gap-3 text-slate-500 shrink-0 font-black text-[10px] lg:text-xs uppercase tracking-[0.2em]">
+               <BarChart2 className="w-5 h-5 text-emerald-600" />
+               MONTHLY SUMMARY
              </div>
-             <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                <div className="bg-[#EAF1EA] text-[#2D5A27] px-3 py-1.5 rounded-lg border border-[#27AE60]/20 whitespace-nowrap">
-                   下山: <span className="font-black text-lg ml-1">{monthStats.down}</span> 天
+             <div className="w-px h-6 bg-slate-200 hidden lg:block"></div>
+             <div className="grid grid-cols-3 gap-3 w-full lg:w-auto">
+                <div className="bg-emerald-600 text-white p-3 sm:px-5 sm:py-2 rounded-2xl shadow-lg shadow-emerald-100 flex flex-col sm:flex-row sm:items-center gap-1">
+                   <span className="text-[10px] font-black opacity-80 sm:hidden">下山</span>
+                   <span className="font-black text-2xl leading-none">{monthStats.down}</span>
+                   <span className="text-[10px] font-black hidden sm:inline ml-1 uppercase opacity-90">Days Down</span>
                 </div>
-                <div className="bg-[#FFF4E5] text-[#D35400] px-3 py-1.5 rounded-lg border border-[#D35400]/20 whitespace-nowrap">
-                   上山: <span className="font-black text-lg ml-1">{monthStats.up}</span> 天
+                <div className="bg-amber-500 text-white p-3 sm:px-5 sm:py-2 rounded-2xl shadow-lg shadow-amber-100 flex flex-col sm:flex-row sm:items-center gap-1">
+                   <span className="text-[10px] font-black opacity-80 sm:hidden">上山</span>
+                   <span className="font-black text-2xl leading-none">{monthStats.up}</span>
+                   <span className="text-[10px] font-black hidden sm:inline ml-1 uppercase opacity-90">Days Up</span>
                 </div>
-                <div className="bg-[#EBF5FB] text-[#2980B9] px-3 py-1.5 rounded-lg border border-[#2980B9]/20 whitespace-nowrap">
-                   住宿: <span className="font-black text-lg ml-1">{monthStats.zhudong}</span> 天
+                <div className="bg-indigo-600 text-white p-3 sm:px-5 sm:py-2 rounded-2xl shadow-lg shadow-indigo-100 flex flex-col sm:flex-row sm:items-center gap-1 text-center">
+                   <span className="text-[10px] font-black opacity-80 sm:hidden">住宿</span>
+                   <span className="font-black text-2xl leading-none">{monthStats.zhudong}</span>
+                   <span className="text-[10px] font-black hidden sm:inline ml-1 uppercase opacity-90">Overnights</span>
                 </div>
              </div>
           </div>
 
-          <div className="divide-y divide-slate-100/50 flex-1 overflow-auto">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-6 py-3 bg-[#f8f9fa] text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden md:grid sticky top-0 z-10 backdrop-blur-md bg-[#f8f9fa]/90">
-              <div>日期</div>
-              <div className="text-center text-[#27AE60]">下山 (綠)</div>
-              <div className="text-center text-[#D35400]">上山 (橘)</div>
-              <div className="text-center text-[#2980B9]">竹東住宿 (藍)</div>
+          <div className="divide-y divide-slate-100/50 flex-1 overflow-auto bg-slate-50/10">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hidden md:grid sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-slate-300"></div>
+                 日期 DATE
+              </div>
+              <div className="text-center font-black">下山 DOWN-MTN</div>
+              <div className="text-center font-black">上山 UP-MTN</div>
+              <div className="text-center font-black">竹東住宿 STAY</div>
             </div>
             
-            <div className="divide-y divide-slate-100 pb-8">
+            <div className="divide-y divide-slate-100/80 px-4 sm:px-8 pb-12">
               {days.map((day) => {
                 const dateStr = format(day, "yyyy-MM-dd");
                 const reg = registrations[dateStr];
@@ -218,42 +245,48 @@ export const MySchedule = () => {
                   <div 
                     key={dateStr} 
                     className={clsx(
-                      "flex flex-col md:grid md:grid-cols-4 gap-4 px-6 py-4 items-center transition-colors hover:bg-slate-50/50",
-                      isToday(day) && "bg-[#EAF1EA]/40",
-                      isDisabled && "opacity-60 bg-slate-50/50 cursor-not-allowed"
+                      "flex flex-col md:grid md:grid-cols-4 gap-4 py-6 md:items-center group transition-all rounded-2xl px-4 md:px-0",
+                      isToday(day) && "bg-emerald-50/30 ring-1 ring-emerald-500/10 -mx-2 px-6",
+                      isDisabled && "opacity-40 grayscale-[0.5]"
                     )}
                   >
-                    <div className="w-full md:w-auto flex items-center justify-between md:justify-start">
-                      <span className={clsx(
-                        "font-black font-mono text-lg",
-                        isToday(day) ? "text-[#2D5A27]" : "text-slate-700"
-                      )}>
-                        {format(day, "MM.dd")}
-                      </span>
-                      <span className={clsx("ml-2 text-xs font-bold", isToday(day) ? "text-[#2D5A27]" : "text-slate-400")}>
-                        {format(day, "EEE", { locale: zhTW }).toUpperCase()}
-                      </span>
-                      {isToday(day) && <span className="ml-3 text-[10px] bg-[#2D5A27] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">TODAY</span>}
-                      {isDisabled && (
-                        <span className="ml-3 flex items-center gap-1 text-[10px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-bold tracking-widest" title="近三日內無法直接修改，請聯繫司機代填">
-                          <Lock className="w-3 h-3" />
-                          鎖定
-                        </span>
-                      )}
+                    <div className="w-full md:w-auto flex items-center justify-between md:justify-start gap-4">
+                       <div className={clsx(
+                         "w-12 h-12 flex flex-col items-center justify-center rounded-2xl shrink-0 transition-transform group-hover:scale-105 shadow-sm border",
+                         isToday(day) ? "bg-emerald-600 text-white border-emerald-500" : "bg-white text-slate-700 border-slate-100"
+                       )}>
+                         <span className="text-[9px] font-black opacity-80 leading-none">{format(day, "EEE", { locale: zhTW })}</span>
+                         <span className="text-xl font-black leading-none">{format(day, "dd")}</span>
+                       </div>
+                       
+                       <div className="flex flex-col flex-1">
+                          <div className="flex items-center gap-2">
+                             <span className={clsx("font-black text-slate-900")}>
+                                {format(day, "MM月dd日")}
+                             </span>
+                             {isToday(day) && <span className="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">TODAY</span>}
+                          </div>
+                          {isDisabled && (
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold mt-0.5">
+                               <Lock className="w-3 h-3" />
+                               <span className="uppercase tracking-tighter">系統已鎖定</span>
+                            </div>
+                          )}
+                       </div>
                     </div>
 
-                    <div className="w-full md:w-auto flex flex-row md:contents gap-3 justify-end">
+                    <div className="w-full md:w-auto flex flex-row md:contents gap-2 items-stretch">
                       
                       {/* 下山 */}
                       <button
                         disabled={isDisabled}
                         onClick={() => toggleStatus(dateStr, "goingDown")}
                         className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl font-black transition-all duration-200 border-2",
+                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
                           reg?.goingDown 
-                            ? "bg-[#EAF1EA] border-[#27AE60] text-[#2D5A27] shadow-sm transform scale-[1.02]" 
-                            : "bg-white border-slate-200 text-slate-300",
-                          !isDisabled && !reg?.goingDown && "hover:border-[#27AE60]/30 hover:bg-[#EAF1EA]/20 hover:text-[#27AE60]"
+                            ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200" 
+                            : "bg-white border-slate-100 text-slate-400 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700",
+                          isDisabled && "cursor-not-allowed opacity-50 gray"
                         )}
                       >
                         下山
@@ -264,11 +297,11 @@ export const MySchedule = () => {
                         disabled={isDisabled}
                         onClick={() => toggleStatus(dateStr, "goingUp")}
                         className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl font-black transition-all duration-200 border-2",
+                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
                           reg?.goingUp 
-                            ? "bg-[#FFF4E5] border-[#D35400] text-[#D35400] shadow-sm transform scale-[1.02]" 
-                            : "bg-white border-slate-200 text-slate-300",
-                          !isDisabled && !reg?.goingUp && "hover:border-[#D35400]/30 hover:bg-[#FFF4E5]/20 hover:text-[#D35400]"
+                            ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200" 
+                            : "bg-white border-slate-100 text-slate-400 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700",
+                          isDisabled && "cursor-not-allowed opacity-50 gray"
                         )}
                       >
                         上山
@@ -279,15 +312,15 @@ export const MySchedule = () => {
                         disabled={isDisabled}
                         onClick={() => toggleStatus(dateStr, "stayingZhudong")}
                         className={clsx(
-                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl font-black transition-all duration-200 border-2",
+                          "flex-1 md:flex-none flex items-center justify-center space-x-2 py-3 px-4 rounded-[1.25rem] font-black transition-all duration-300 border-2 text-sm sm:text-base",
                           reg?.stayingZhudong 
-                            ? "bg-[#EBF5FB] border-[#2980B9] text-[#2980B9] shadow-sm transform scale-[1.02]" 
-                            : "bg-white border-slate-200 text-slate-300",
-                          !isDisabled && !reg?.stayingZhudong && "hover:border-[#2980B9]/30 hover:bg-[#EBF5FB]/20 hover:text-[#2980B9]"
+                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200" 
+                            : "bg-white border-slate-100 text-slate-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700",
+                          isDisabled && "cursor-not-allowed opacity-50 gray"
                         )}
                       >
                         <span className="hidden sm:inline">竹東住宿</span>
-                        <span className="sm:hidden">過夜</span>
+                        <span className="sm:hidden">住宿</span>
                       </button>
                     </div>
                   </div>
